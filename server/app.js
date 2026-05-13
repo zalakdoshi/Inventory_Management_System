@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 const logger = require('./utils/logger');
 
 // Route imports
@@ -17,6 +18,9 @@ const reportRoutes = require('./routes/reports');
 const passwordResetRoutes = require('./routes/passwordReset');
 
 const app = express();
+
+// ── Compression Middleware (Reduce response size) ────────────────
+app.use(compression());
 
 // ── Security Middleware ────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
