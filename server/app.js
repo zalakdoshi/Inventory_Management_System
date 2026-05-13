@@ -1,0 +1,137 @@
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const path = require('path');
+const rateLimit = require('express-rate-limit');
+const logger = require('./utils/logger');
+
+// Route imports
+const authRoutes = require('./routes/auth');
+const productRoutes = require('./routes/products');
+const purchaseRoutes = require('./routes/purchases');
+const orderRoutes = require('./routes/orders');
+const billRoutes = require('./routes/bills');
+const userRoutes = require('./routes/users');
+const reportRoutes = require('./routes/reports');
+const passwordResetRoutes = require('./routes/passwordReset');
+
+const app = express();
+
+// ── Security Middleware ────────────────────────────────────────
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+
+// ── CORS ────────────────────────────────────────────────────────
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:3000',
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// ── Rate Limiting ───────────────────────────────────────────────
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200,
+  message: { success: false, message: 'Too many requests. Try again later.' },
+});
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { success: false, message: 'Too many login attempts. Try again in 15 minutes.' },
+});
+
+app.use('/api/', limiter);
+app.use('/api/auth/login', authLimiter);
+
+// ── Body Parsing ────────────────────────────────────────────────
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Only log errors (4xx/5xx) in dev — skip noisy GET logs
+if (process.env.NODE_ENV !== 'test') {
+  app.use(morgan('dev', {
+    skip: (req, res) => res.statusCode < 400,
+    stream: { write: (msg) => logger.warn(msg.trim()) }
+  }));
+}
+
+// ── Static Files ────────────────────────────────────────────────
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
+
+// ── Health Check ────────────────────────────────────────────────
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Vardhman Family ERP API is running.',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+  });
+});
+
+// ── API Routes ──────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/purchases', purchaseRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/bills', billRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/password-reset', passwordResetRoutes);
+
+// ── Suppliers Route ─────────────────────────────────────────────
+const Supplier = require('./models/Supplier');
+const { protect, authorize } = require('./middleware/auth');
+
+app.get('/api/suppliers', protect, async (req, res) => {
+  const suppliers = await Supplier.find({ isActive: true }).select('name phone email gstin categories');
+  res.json({ success: true, data: suppliers });
+});
+
+app.post('/api/suppliers', protect, authorize('admin', 'purchaser'), async (req, res) => {
+  try {
+    const supplier = await Supplier.create({ ...req.body, createdBy: req.user._id });
+    res.status(201).json({ success: true, data: supplier, message: 'Supplier created.' });
+  } catch (e) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
+app.put('/api/suppliers/:id', protect, authorize('admin'), async (req, res) => {
+  const s = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  res.json({ success: true, data: s });
+});
+
+app.delete('/api/suppliers/:id', protect, authorize('admin'), async (req, res) => {
+  await Supplier.findByIdAndDelete(req.params.id);
+  res.json({ success: true, message: 'Supplier deleted.' });
+});
+
+// ── 404 Handler ─────────────────────────────────────────────────
+app.use('/{*path}', (req, res) => {
+  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found.` });
+});
+
+// ── Global Error Handler ─────────────────────────────────────────
+app.use((err, req, res, next) => {
+  logger.error('Global error:', err.message);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal server error.',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
+module.exports = app;

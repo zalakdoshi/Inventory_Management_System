@@ -1,0 +1,153 @@
+2026-05-10 23:27:19 [error]: ❌ MongoDB Connection Error: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017
+2026-05-11 10:44:29 [error]: ❌ MongoDB Connection Error: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
+2026-05-11 10:47:01 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-11 10:47:01 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 10:47:01 [info]: 📌 Environment: development
+2026-05-11 10:47:01 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 10:48:31 [info]: 127.0.0.1 - - [11/May/2026:05:18:31 +0000] "POST /api/auth/login HTTP/1.1" 200 412 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:32 [info]: 127.0.0.1 - - [11/May/2026:05:18:32 +0000] "GET /api/reports/dashboard HTTP/1.1" 200 746 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:32 [info]: 127.0.0.1 - - [11/May/2026:05:18:32 +0000] "GET /api/reports/dashboard HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:43 [info]: 127.0.0.1 - - [11/May/2026:05:18:43 +0000] "GET /api/suppliers HTTP/1.1" 200 633 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:43 [info]: 127.0.0.1 - - [11/May/2026:05:18:43 +0000] "GET /api/products?page=1&limit=10&search=&category=&status= HTTP/1.1" 200 3861 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:43 [info]: 127.0.0.1 - - [11/May/2026:05:18:43 +0000] "GET /api/suppliers HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:44 [info]: 127.0.0.1 - - [11/May/2026:05:18:44 +0000] "GET /api/products?page=1&limit=10&search=&category=&status= HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:48 [info]: 127.0.0.1 - - [11/May/2026:05:18:48 +0000] "GET /api/purchases?page=1&limit=15 HTTP/1.1" 200 81 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:48 [info]: 127.0.0.1 - - [11/May/2026:05:18:48 +0000] "GET /api/purchases?page=1&limit=15 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:51 [info]: 127.0.0.1 - - [11/May/2026:05:18:51 +0000] "GET /api/products/stats HTTP/1.1" 200 242 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:51 [info]: 127.0.0.1 - - [11/May/2026:05:18:51 +0000] "GET /api/products?limit=100&lowStock= HTTP/1.1" 200 3862 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:51 [info]: 127.0.0.1 - - [11/May/2026:05:18:51 +0000] "GET /api/products/stats HTTP/1.1" 200 242 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:51 [info]: 127.0.0.1 - - [11/May/2026:05:18:51 +0000] "GET /api/products?limit=100&lowStock= HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:54 [info]: 127.0.0.1 - - [11/May/2026:05:18:54 +0000] "GET /api/bills?page=1&limit=15&search= HTTP/1.1" 200 81 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:54 [info]: 127.0.0.1 - - [11/May/2026:05:18:54 +0000] "GET /api/bills?page=1&limit=15&search= HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:55 [info]: 127.0.0.1 - - [11/May/2026:05:18:55 +0000] "GET /api/suppliers HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:55 [info]: 127.0.0.1 - - [11/May/2026:05:18:55 +0000] "GET /api/suppliers HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:57 [info]: 127.0.0.1 - - [11/May/2026:05:18:57 +0000] "GET /api/reports/dashboard HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:48:58 [info]: 127.0.0.1 - - [11/May/2026:05:18:58 +0000] "GET /api/reports/dashboard HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:00 [info]: 127.0.0.1 - - [11/May/2026:05:19:00 +0000] "GET /api/reports/export?type=sales HTTP/1.1" 200 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:11 [info]: 127.0.0.1 - - [11/May/2026:05:19:11 +0000] "GET /api/users?search=&role=&limit=50 HTTP/1.1" 200 1221 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:11 [info]: 127.0.0.1 - - [11/May/2026:05:19:11 +0000] "GET /api/users?search=&role=&limit=50 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:16 [info]: 127.0.0.1 - - [11/May/2026:05:19:16 +0000] "GET /api/reports/activity-logs?page=1&limit=20&module=&action= HTTP/1.1" 200 582 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:16 [info]: 127.0.0.1 - - [11/May/2026:05:19:16 +0000] "GET /api/reports/activity-logs?page=1&limit=20&module=&action= HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:18 [info]: 127.0.0.1 - - [11/May/2026:05:19:18 +0000] "GET /api/password-reset?status=pending HTTP/1.1" 200 26 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:18 [info]: 127.0.0.1 - - [11/May/2026:05:19:18 +0000] "GET /api/password-reset?status=pending HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:22 [info]: 127.0.0.1 - - [11/May/2026:05:19:22 +0000] "POST /api/auth/logout HTTP/1.1" 200 53 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:26 [info]: 127.0.0.1 - - [11/May/2026:05:19:26 +0000] "POST /api/auth/login HTTP/1.1" 200 420 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:26 [info]: 127.0.0.1 - - [11/May/2026:05:19:26 +0000] "GET /api/purchases?limit=5 HTTP/1.1" 200 80 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:27 [info]: 127.0.0.1 - - [11/May/2026:05:19:27 +0000] "GET /api/products?lowStock=true&limit=8 HTTP/1.1" 200 80 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:27 [info]: 127.0.0.1 - - [11/May/2026:05:19:27 +0000] "GET /api/purchases?limit=5 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:27 [info]: 127.0.0.1 - - [11/May/2026:05:19:27 +0000] "GET /api/products?lowStock=true&limit=8 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:27 [info]: 127.0.0.1 - - [11/May/2026:05:19:27 +0000] "GET /api/reports/dashboard HTTP/1.1" 200 1755 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:27 [info]: 127.0.0.1 - - [11/May/2026:05:19:27 +0000] "GET /api/reports/dashboard HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:34 [info]: 127.0.0.1 - - [11/May/2026:05:19:34 +0000] "GET /api/suppliers HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:34 [info]: 127.0.0.1 - - [11/May/2026:05:19:34 +0000] "GET /api/products?limit=200&status=active HTTP/1.1" 200 3862 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:34 [info]: 127.0.0.1 - - [11/May/2026:05:19:34 +0000] "GET /api/suppliers HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:34 [info]: 127.0.0.1 - - [11/May/2026:05:19:34 +0000] "GET /api/products?limit=200&status=active HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:38 [info]: 127.0.0.1 - - [11/May/2026:05:19:38 +0000] "GET /api/purchases?page=1&limit=15 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:39 [info]: 127.0.0.1 - - [11/May/2026:05:19:39 +0000] "GET /api/purchases?page=1&limit=15 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:41 [info]: 127.0.0.1 - - [11/May/2026:05:19:41 +0000] "GET /api/suppliers HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:41 [info]: 127.0.0.1 - - [11/May/2026:05:19:41 +0000] "GET /api/suppliers HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:45 [info]: 127.0.0.1 - - [11/May/2026:05:19:45 +0000] "POST /api/auth/logout HTTP/1.1" 200 53 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:50 [info]: 127.0.0.1 - - [11/May/2026:05:19:50 +0000] "POST /api/auth/login HTTP/1.1" 200 420 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:50 [info]: 127.0.0.1 - - [11/May/2026:05:19:50 +0000] "GET /api/bills?limit=5 HTTP/1.1" 200 80 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:50 [info]: 127.0.0.1 - - [11/May/2026:05:19:50 +0000] "GET /api/bills?limit=5 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:50 [info]: 127.0.0.1 - - [11/May/2026:05:19:50 +0000] "GET /api/orders?limit=5 HTTP/1.1" 200 80 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:50 [info]: 127.0.0.1 - - [11/May/2026:05:19:50 +0000] "GET /api/reports/dashboard HTTP/1.1" 200 2775 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:50 [info]: 127.0.0.1 - - [11/May/2026:05:19:50 +0000] "GET /api/orders?limit=5 HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:50 [info]: 127.0.0.1 - - [11/May/2026:05:19:50 +0000] "GET /api/reports/dashboard HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:53 [info]: 127.0.0.1 - - [11/May/2026:05:19:53 +0000] "GET /api/products?limit=100&search=&category=&status=active HTTP/1.1" 200 3862 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:49:53 [info]: 127.0.0.1 - - [11/May/2026:05:19:53 +0000] "GET /api/products?limit=100&search=&category=&status=active HTTP/1.1" 304 - "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:50:35 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-01.uecpw01.mongodb.net
+2026-05-11 10:50:35 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 10:50:35 [info]: 📌 Environment: development
+2026-05-11 10:50:35 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 10:51:44 [info]: 127.0.0.1 - - [11/May/2026:05:21:44 +0000] "POST /api/auth/logout HTTP/1.1" 401 52 "http://localhost:5173/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+2026-05-11 10:51:49 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-11 10:51:49 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 10:51:49 [info]: 📌 Environment: development
+2026-05-11 10:51:49 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 10:52:36 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-11 10:52:36 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 10:52:36 [info]: 📌 Environment: development
+2026-05-11 10:52:36 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 10:55:04 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-11 10:55:04 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 10:55:04 [info]: 📌 Environment: development
+2026-05-11 10:55:04 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 18:57:15 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-11 18:57:15 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 18:57:15 [info]: 📌 Environment: development
+2026-05-11 18:57:15 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 18:58:12 [warn]: [0mGET /api/reports/dashboard [33m401[0m 51.632 ms - 52[0m
+2026-05-11 18:58:13 [warn]: [0mGET /api/reports/dashboard [33m401[0m 32.451 ms - 52[0m
+2026-05-11 19:04:51 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-01.uecpw01.mongodb.net
+2026-05-11 19:04:51 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 19:04:51 [info]: 📌 Environment: development
+2026-05-11 19:04:51 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 19:18:56 [warn]: [0mPOST /api/password-reset/request [33m401[0m 0.479 ms - 63[0m
+2026-05-11 19:19:31 [warn]: [0mPOST /api/password-reset/request [33m401[0m 0.407 ms - 63[0m
+2026-05-11 19:20:01 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-11 19:20:01 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 19:20:01 [info]: 📌 Environment: development
+2026-05-11 19:20:01 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 19:21:22 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-11 19:21:22 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 19:21:22 [info]: 📌 Environment: development
+2026-05-11 19:21:22 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 19:22:33 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-11 19:22:33 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 19:22:33 [info]: 📌 Environment: development
+2026-05-11 19:22:33 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-11 22:35:44 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-01.uecpw01.mongodb.net
+2026-05-11 22:35:44 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-11 22:35:44 [info]: 📌 Environment: development
+2026-05-11 22:35:44 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 21:08:15 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-12 21:08:15 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 21:08:15 [info]: 📌 Environment: development
+2026-05-12 21:08:15 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 21:17:43 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-01.uecpw01.mongodb.net
+2026-05-12 21:17:43 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 21:17:43 [info]: 📌 Environment: development
+2026-05-12 21:17:43 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 21:48:49 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-12 21:48:49 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 21:48:49 [info]: 📌 Environment: development
+2026-05-12 21:48:49 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 21:50:48 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-12 21:50:48 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 21:50:48 [info]: 📌 Environment: development
+2026-05-12 21:50:48 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 21:50:55 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-01.uecpw01.mongodb.net
+2026-05-12 21:50:55 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 21:50:55 [info]: 📌 Environment: development
+2026-05-12 21:50:55 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 21:54:24 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-01.uecpw01.mongodb.net
+2026-05-12 21:54:24 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 21:54:24 [info]: 📌 Environment: development
+2026-05-12 21:54:24 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 21:54:48 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-12 21:54:48 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 21:54:48 [info]: 📌 Environment: development
+2026-05-12 21:54:48 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-12 22:04:10 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-12 22:04:10 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-12 22:04:10 [info]: 📌 Environment: development
+2026-05-12 22:04:10 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-13 12:46:01 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-13 12:46:01 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-13 12:46:01 [info]: 📌 Environment: development
+2026-05-13 12:46:01 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-13 12:50:23 [warn]: [0mPOST /api/password-reset/request [33m404[0m 72.363 ms - 60[0m
+2026-05-13 12:51:11 [error]: Email send error:
+2026-05-13 12:55:54 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-02.uecpw01.mongodb.net
+2026-05-13 12:55:54 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-13 12:55:54 [info]: 📌 Environment: development
+2026-05-13 12:55:54 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-13 13:04:13 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-13 13:04:13 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-13 13:04:13 [info]: 📌 Environment: development
+2026-05-13 13:04:13 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-13 13:07:29 [info]: ✅ MongoDB Connected: ac-eklefns-shard-00-00.uecpw01.mongodb.net
+2026-05-13 13:07:29 [info]: 🚀 Vardhman Family ERP Server running on port 5000
+2026-05-13 13:07:29 [info]: 📌 Environment: development
+2026-05-13 13:07:29 [info]: 🌐 API Base: http://0.0.0.0:5000/api
