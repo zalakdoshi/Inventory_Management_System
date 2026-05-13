@@ -13,6 +13,65 @@ const generateToken = (id) => {
 };
 
 /**
+ * @desc    Register new user
+ * @route   POST /api/auth/register
+ * @access  Public
+ */
+const register = async (req, res) => {
+  try {
+    const { name, email, password, phone, role } = req.body;
+
+    // Validation
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Name, email, and password are required.' });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Email already registered.' });
+    }
+
+    // Create new user
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone: phone || '',
+      role: role || 'salesman', // Default role
+      isActive: true,
+    });
+
+    const token = generateToken(user._id);
+
+    await createActivityLog({
+      user,
+      action: 'REGISTER',
+      module: 'Auth',
+      description: `New user ${user.name} registered as ${user.role}`,
+      req,
+      severity: 'low',
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Registration successful.',
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+      },
+    });
+  } catch (error) {
+    logger.error('Register error:', error);
+    res.status(500).json({ success: false, message: 'Server error during registration.' });
+  }
+};
+
+/**
  * @desc    Login user
  * @route   POST /api/auth/login
  * @access  Public
@@ -143,4 +202,4 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { login, getMe, logout, changePassword };
+module.exports = { register, login, getMe, logout, changePassword };
