@@ -23,9 +23,12 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // ── CORS ────────────────────────────────────────────────────────
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
-  'http://localhost:3000',
   'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000',
+  'https://vardhman-erp-beta.vercel.app',
+  'https://vardhman-erp.vercel.app',
+  process.env.FRONTEND_URL,
 ];
 
 // Add Vercel deployment URL if available
@@ -33,9 +36,12 @@ if (process.env.VERCEL_URL) {
   allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
 }
 
+// Filter out undefined values
+const validOrigins = allowedOrigins.filter(origin => origin && origin !== 'undefined');
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    if (!origin || validOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
