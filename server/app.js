@@ -87,6 +87,27 @@ app.get('/health', (req, res) => {
   });
 });
 
+// ── Root Route ───────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Vardhman Family ERP API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      auth: '/api/auth',
+      products: '/api/products',
+      purchases: '/api/purchases',
+      orders: '/api/orders',
+      bills: '/api/bills',
+      users: '/api/users',
+      reports: '/api/reports',
+      suppliers: '/api/suppliers',
+    },
+  });
+});
+
 // ── API Routes ──────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
