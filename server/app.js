@@ -22,6 +22,17 @@ const app = express();
 // ── Compression Middleware (Reduce response size) ────────────────
 app.use(compression());
 
+// ── Cache Headers Middleware ────────────────────────────────────
+app.use((req, res, next) => {
+  // Cache GET requests for 5 minutes
+  if (req.method === 'GET') {
+    res.set('Cache-Control', 'public, max-age=300');
+  } else {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  next();
+});
+
 // ── Security Middleware ────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
