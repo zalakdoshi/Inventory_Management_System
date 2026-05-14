@@ -248,43 +248,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── ERP FEATURES ─────────────────────────────── */}
-      <section id="features" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="text-primary-600 font-semibold text-sm uppercase tracking-widest">ERP System</span>
-            <h2 className="text-4xl font-heading font-bold text-gray-900 mt-2">Powerful <span className="text-gradient">ERP Features</span></h2>
-          </div>
-          <div className="grid lg:grid-cols-3 gap-8">
-            {[
-              { role: 'Admin', icon: '👑', color: 'border-red-200 bg-red-50', items: ['Complete Dashboard Analytics', 'Product & Inventory CRUD', 'User Management & RBAC', 'Reports with Excel Export', 'Audit Trail & Activity Logs', 'Password Reset Approvals'] },
-              { role: 'Purchaser', icon: '🛒', color: 'border-blue-200 bg-blue-50', items: ['Create Purchase Orders', 'Supplier Management', 'Auto Inventory Update', 'Purchase History', 'Low Stock Alerts', 'Activity Logging'] },
-              { role: 'Salesman', icon: '💼', color: 'border-green-200 bg-green-50', items: ['GST Invoice Generation', 'PDF Invoice Download', 'Order Tracking Timeline', 'Real-time Stock View', 'Customer Management', 'Payment Recording'] },
-            ].map((role, i) => (
-              <div key={i} className={`rounded-2xl border-2 ${role.color} p-6`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-3xl">{role.icon}</span>
-                  <h3 className="font-heading font-bold text-xl text-gray-900">{role.role} Module</h3>
-                </div>
-                <ul className="space-y-2">
-                  {role.items.map((item, j) => (
-                    <li key={j} className="flex items-center gap-2 text-gray-600 text-sm">
-                      <CheckCircle size={14} className="text-primary-500 flex-shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-10">
-            <Link to="/login" className="btn-primary text-base py-3 px-8 inline-flex items-center gap-2">
-              Access ERP System <ChevronRight size={18} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* ── CONTACT ──────────────────────────────────── */}
       <section id="contact" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -374,7 +337,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="border-t border-dark-600 py-4">
-          <p className="text-center text-sm text-gray-600">Copyright © 2025 Vardhman Family. All rights reserved. Develop By Kias Technologies.</p>
+          <p className="text-center text-sm text-gray-600">Copyright © 2025 Vardhman Family. All rights reserved. Made by Zalak & Diya</p>
         </div>
       </footer>
     </div>
