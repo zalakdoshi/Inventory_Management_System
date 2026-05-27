@@ -14,12 +14,10 @@ const SERVICES = [
 ];
 
 const PRODUCTS = [
-  { name: 'Biogas Components', icon: '🔬', color: 'from-green-500 to-emerald-600', items: ['Inlet Tanks', 'Dome Holders', 'Burners', 'Slurry Mixers'] },
-  { name: 'CNG Equipment', icon: '⚡', color: 'from-blue-500 to-cyan-600', items: ['CNG Cylinders', 'Regulators', 'Fueling Nozzles', 'Type I & IV'] },
-  { name: 'Pipes', icon: '🔧', color: 'from-orange-500 to-amber-600', items: ['HDPE Pipes', 'MS Seamless', 'GI Medium Class', 'All schedules'] },
-  { name: 'Valves', icon: '🎛️', color: 'from-purple-500 to-violet-600', items: ['Ball Valves', 'Gate Valves', 'Safety Relief', 'Solenoid'] },
-  { name: 'Compressors', icon: '⚙️', color: 'from-red-500 to-rose-600', items: ['5HP–50HP', 'Single Stage', 'Booster', 'CNG Station'] },
-  { name: 'Storage', icon: '🛢️', color: 'from-teal-500 to-cyan-600', items: ['Gas Balloons', 'Pressure Vessels', 'ASME Certified', '200L–5000L'] },
+  { name: 'Electrical', icon: '⚡', color: 'from-blue-500 to-indigo-600', items: ['Single/Double Pole MCBs', 'Schneider Contactors', 'Indicators & Push Buttons', 'Plastic Wire Trays & Plugs'] },
+  { name: 'Hydraulic', icon: '🎛️', color: 'from-purple-500 to-violet-600', items: ['ABC Fire Extinguishers', 'PVC Braided Hoses', 'LPG Rubber Hoses & Adaptors', 'Hex Nipples & Brass Nuts'] },
+  { name: 'Bearing', icon: '⚙️', color: 'from-orange-500 to-amber-600', items: ['UCP Bearing Housings', 'UCF SKF BRG Housings', 'UCFL & UCT series SMTB', 'Bearings 6000ZZ / 2RS'] },
+  { name: 'Consumable', icon: '🔧', color: 'from-red-500 to-rose-600', items: ['4" & 7" Cut Off Wheels', 'Mop Wheels (various sizes)', 'DC Wheels (Green/Black)', 'Flap Discs (N CUT)'] },
 ];
 
 const STATS = [

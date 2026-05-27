@@ -1,20 +1,11 @@
 const mongoose = require('mongoose');
 
-// HSN codes for biogas/CNG/new categories
+// HSN codes for active categories
 const HSN_CODES = {
-  'Biogas Components': '8419',
-  'CNG Equipment': '8412',
-  'Pipes': '7304',
-  'Valves': '8481',
-  'Compressors': '8414',
-  'Storage Equipment': '7311',
-  'Fittings': '7307',
-  'Safety Equipment': '3926',
   'Electrical': '8536',
   'Hydraulic': '8412',
   'Bearing': '8482',
   'Consumable': '3824',
-  'Other': '9999',
 };
 
 const productSchema = new mongoose.Schema(
@@ -35,19 +26,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Category is required'],
       enum: [
-        'Biogas Components',
-        'CNG Equipment',
-        'Pipes',
-        'Valves',
-        'Compressors',
-        'Storage Equipment',
-        'Fittings',
-        'Safety Equipment',
         'Electrical',
         'Hydraulic',
         'Bearing',
         'Consumable',
-        'Other',
       ],
     },
     sellingPrice: {
