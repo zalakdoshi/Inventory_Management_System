@@ -96,6 +96,16 @@ const createProduct = async (req, res) => {
   try {
     const productData = { ...req.body, createdBy: req.user._id };
 
+    // Prevent casting errors for empty supplier fields
+    if (productData.supplier === '' || productData.supplier === 'null' || productData.supplier === 'undefined') {
+      productData.supplier = null;
+    }
+    // Clean empty numeric fields
+    if (productData.quantity === '') delete productData.quantity;
+    if (productData.reorderLevel === '') delete productData.reorderLevel;
+    if (productData.sellingPrice === '') delete productData.sellingPrice;
+    if (productData.purchasePrice === '') delete productData.purchasePrice;
+
     if (req.file) {
       productData.image = `/uploads/products/${req.file.filename}`;
     }
@@ -135,6 +145,16 @@ const updateProduct = async (req, res) => {
     }
 
     const updateData = { ...req.body, updatedBy: req.user._id };
+
+    // Prevent casting errors for empty supplier fields
+    if (updateData.supplier === '' || updateData.supplier === 'null' || updateData.supplier === 'undefined') {
+      updateData.supplier = null;
+    }
+    // Clean empty numeric fields
+    if (updateData.quantity === '') delete updateData.quantity;
+    if (updateData.reorderLevel === '') delete updateData.reorderLevel;
+    if (updateData.sellingPrice === '') delete updateData.sellingPrice;
+    if (updateData.purchasePrice === '') delete updateData.purchasePrice;
 
     if (req.file) {
       // Delete old image if exists
