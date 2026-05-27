@@ -19,11 +19,11 @@ export default function SalesmanDashboard() {
       api.get('/bills', { params: { limit: 5 } }),
       api.get('/orders', { params: { limit: 5 } }),
     ]).then(([sRes, bRes, oRes]) => {
-      if (sRes.status === 'fulfilled') setStats(sRes.value.data.data);
-      if (bRes.status === 'fulfilled') setBills(bRes.value.data.data);
-      if (oRes.status === 'fulfilled') setOrders(oRes.value.data.data);
+      if (sRes.status === 'fulfilled') setStats(sRes.value.data?.data || null);
+      if (bRes.status === 'fulfilled') setBills(Array.isArray(bRes.value.data?.data) ? bRes.value.data.data : []);
+      if (oRes.status === 'fulfilled') setOrders(Array.isArray(oRes.value.data?.data) ? oRes.value.data.data : []);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   return (
