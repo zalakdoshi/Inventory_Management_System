@@ -24,8 +24,8 @@ app.use(compression());
 
 // ── Cache Headers Middleware ────────────────────────────────────
 app.use((req, res, next) => {
-  // Cache GET requests for 5 minutes
-  if (req.method === 'GET') {
+  // Exclude API routes from GET caching to ensure fresh inventory and product data
+  if (req.method === 'GET' && !req.path.startsWith('/api/')) {
     res.set('Cache-Control', 'public, max-age=300');
   } else {
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
