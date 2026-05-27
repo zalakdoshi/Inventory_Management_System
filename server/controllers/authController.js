@@ -98,13 +98,16 @@ const login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     }
 
-    // Update last login
+    // Update last login (in the background)
     user.lastLogin = new Date();
-    await user.save({ validateBeforeSave: false });
+    user.save({ validateBeforeSave: false }).catch(err => {
+      logger.error('Failed to update last login in background:', err.message);
+    });
 
     const token = generateToken(user._id);
 
-    await createActivityLog({
+    // Log activity (in the background)
+    createActivityLog({
       user,
       action: 'LOGIN',
       module: 'Auth',
