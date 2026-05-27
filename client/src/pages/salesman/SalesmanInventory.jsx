@@ -119,7 +119,7 @@ function ProductCard({ group }) {
                   : 'text-gray-800'
             }`}
           >
-            {selectedProduct.quantity} {selectedProduct.unit}
+            {selectedProduct.quantity} {formatUnit(selectedProduct.unit)}
           </p>
           <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
             Stock Qty
@@ -128,6 +128,23 @@ function ProductCard({ group }) {
       </div>
     </div>
   );
+}
+
+// ─── Helper: unit abbreviation display ──────────────────────────────────────
+function formatUnit(unit) {
+  const map = {
+    'Meter': 'MTR', 'meter': 'MTR',
+    'Piece': 'PCS', 'piece': 'PCS',
+    'NOS': 'PCS', 'nos': 'PCS',
+    'Box': 'Box',
+    'KG': 'KG', 'kg': 'KG',
+    'Liter': 'LTR', 'liter': 'LTR',
+    'Set': 'Set',
+    'Pair': 'Pair',
+    'Roll': 'Roll',
+    'Packet': 'Pkt',
+  };
+  return map[unit] || unit || 'PCS';
 }
 
 // ─── Helper: longest common word-level prefix ────────────────────────────────
@@ -341,13 +358,13 @@ function buildGroupedProducts(list) {
     }
     // ── 9. PVC Braided Hose ───────────────────────────────────────────────────
     else if (U.includes('PVC BRADIED') || U.includes('PVC BRAIDED')) {
-      const m = name.match(/(\d+MM|\d+\s*MM)/i);
-      mainName = 'PVC Braided Hose'; subtypeName = m ? m[1].toUpperCase() : 'Standard';
+      const suffix = name.replace(/PVC BR[AI]+DIED?/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'PVC Braided Hose'; subtypeName = suffix || 'Standard';
     }
     // ── 10. Pneumatic Rubber Hose ─────────────────────────────────────────────
     else if (U.includes('PNEUMATIC') && U.includes('RUBBER') && U.includes('HOSE')) {
-      const m = name.match(/(\d+\s*MM|\d+MM)/i);
-      mainName = 'Pneumatic Rubber Hose'; subtypeName = m ? m[1].toUpperCase() : 'Standard';
+      const suffix = name.replace(/PNEUMATIC RUBBER HOSE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Pneumatic Rubber Hose'; subtypeName = suffix || 'Standard';
     }
     // ── 11. Samson PVC Braided Hose ───────────────────────────────────────────
     else if (U.includes('SAMSON PVC') && U.includes('HOSE')) {
@@ -392,18 +409,164 @@ function buildGroupedProducts(list) {
       const suffix = name.replace(/JOLLY WORM DRIVE HOSE CLIPS/gi, '').replace(/WORM DRIVE HOSE CLIPS/gi, '').trim().replace(/^[-_\s]+/, '');
       mainName = 'Jolly Worm Drive Hose Clips'; subtypeName = suffix || 'Standard';
     }
-    // ── 18. Flap Disc / Mop Wheel / Cut Off Wheel / DC Wheel ─────────────────
+    // ── H1. ABC Fire Extinguisher ────────────────────────────────────────────
+    else if (U.includes('FIRE EXTINGUISHER') || U.includes('EXTINGUISHER')) {
+      const suffix = name.replace(/ABC FIRE EXTINGUISHERS?/gi, '').replace(/FIRE EXTINGUISHERS?/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'ABC Fire Extinguisher'; subtypeName = suffix || 'Standard';
+    }
+    // ── H2. Fire Safety (Fire Stop / Fire Ball) ──────────────────────────────
+    else if (U.includes('FIRE STOP') || U.includes('FIRE BALL')) {
+      mainName = 'Fire Safety';
+      subtypeName = U.includes('FIRE STOP') ? 'Fire Stop' : 'Fire Ball';
+    }
+    // ── H3. LPG Adaptor Multipoint ───────────────────────────────────────────
+    else if (U.includes('LPG ADAPTOR') || U.includes('LPG ADAPTER')) {
+      const suffix = name.replace(/LPG ADAPT[OE]R MULTIPOINT/gi, '').replace(/LPG ADAPT[OE]R/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'LPG Adaptor Multipoint'; subtypeName = suffix || 'Standard';
+    }
+    // ── H4. LPG Variable High Pressure Regulator ─────────────────────────────
+    else if (U.includes('LPG VARIABLE') || U.includes('HIGH PRESSURE REGULATOR')) {
+      const suffix = name.replace(/LPG VARIABLE HIGH PRESSURE REGULATOR/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'LPG Variable High Pressure Regulator'; subtypeName = suffix || 'Standard';
+    }
+    // ── H5. Pragati Regulator ────────────────────────────────────────────────
+    else if (U.includes('PRAGATI')) {
+      const suffix = name.replace(/PRAGATI REGULATOR/gi, '').replace(/PRAGATI/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Pragati Regulator'; subtypeName = suffix || 'Standard';
+    }
+    // ── H6. M S Bush ─────────────────────────────────────────────────────────
+    else if (U.includes('M S BUSH') || U.includes('MS BUSH')) {
+      const suffix = name.replace(/M\s*S\s*BUSH/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Bush'; subtypeName = suffix || 'Standard';
+    }
+    // ── H7. Brass Nut Nipple ─────────────────────────────────────────────────
+    else if (U.includes('BRASS NUT NIPPLE')) {
+      const suffix = name.replace(/BRASS NUT NIPPLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Brass Nut Nipple'; subtypeName = suffix || 'Standard';
+    }
+    // ── H8. LP Cap ───────────────────────────────────────────────────────────
+    else if (U.startsWith('LP CAP')) {
+      const suffix = name.replace(/LP CAP/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'LP Cap'; subtypeName = suffix || 'Standard';
+    }
+    // ── H9. LP Nut Nipple ────────────────────────────────────────────────────
+    else if (U.includes('LP NUT NIPPLE')) {
+      const suffix = name.replace(/LP NUT NIPPLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'LP Nut Nipple'; subtypeName = suffix || 'Standard';
+    }
+    // ── H10. M S Hex Nipple ──────────────────────────────────────────────────
+    else if (U.includes('M S HEX NIPPLE') || U.includes('MS HEX NIPPLE')) {
+      const suffix = name.replace(/M\s*S\s*HEX NIPPLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Hex Nipple'; subtypeName = suffix || 'Standard';
+    }
+    // ── H11. SS 304 Hex Nipple ───────────────────────────────────────────────
+    else if (U.includes('SS 304 HEX NIPPLE') || U.includes('SS304 HEX NIPPLE')) {
+      const suffix = name.replace(/SS\s*304\s*HEX NIPPLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'SS 304 Hex Nipple'; subtypeName = suffix || 'Standard';
+    }
+    // ── H12. M S Female Tee ──────────────────────────────────────────────────
+    else if (U.includes('M S FEMALE TEE') || U.includes('MS FEMALE TEE')) {
+      const suffix = name.replace(/M\s*S\s*FEMALE TEE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Female Tee'; subtypeName = suffix || 'Standard';
+    }
+    // ── H13. M S Male Elbow ──────────────────────────────────────────────────
+    else if (U.includes('M S MALE ELBOW') || U.includes('MS MALE ELBOW')) {
+      const suffix = name.replace(/M\s*S\s*MALE ELBOW/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Male Elbow'; subtypeName = suffix || 'Standard';
+    }
+    // ── H14. M S Female Elbow ────────────────────────────────────────────────
+    else if (U.includes('M S FEMALE ELBOW') || U.includes('MS FEMALE ELBOW') || U.includes('FE MALE ELBOW')) {
+      const suffix = name.replace(/M\s*S\s*FEMALE ELBOW/gi, '').replace(/FE MALE ELBOW/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Female Elbow'; subtypeName = suffix || 'Standard';
+    }
+    // ── H15. M S Male Tee ────────────────────────────────────────────────────
+    else if (U.includes('M S MALE TEE') || U.includes('MS MALE TEE')) {
+      const suffix = name.replace(/M\s*S\s*MALE TEE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Male Tee'; subtypeName = suffix || 'Standard';
+    }
+    // ── H16. M S Long Nipple ─────────────────────────────────────────────────
+    else if (U.includes('M S LONG NIPPLE') || U.includes('MS LONG NIPPLE')) {
+      const suffix = name.replace(/M\s*S\s*LONG NIPPLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Long Nipple'; subtypeName = suffix || 'Standard';
+    }
+    // ── H17. M S Dead Plug ───────────────────────────────────────────────────
+    else if (U.includes('M S DEAD PLUG') || U.includes('MS DEAD PLUG')) {
+      const suffix = name.replace(/M\s*S\s*DEAD PLUG/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Dead Plug'; subtypeName = suffix || 'Standard';
+    }
+    // ── H18. SS 304 Coupling ─────────────────────────────────────────────────
+    else if (U.includes('SS 304 COUPLING') || U.includes('SS304 COUPLING')) {
+      const suffix = name.replace(/SS\s*304\s*COUPLING/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'SS 304 Coupling'; subtypeName = suffix || 'Standard';
+    }
+    // ── H19. PU Male Connector ───────────────────────────────────────────────
+    else if (U.includes('PU MALE CONNECTOR')) {
+      const suffix = name.replace(/PU MALE CONNECTOR/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'PU Male Connector'; subtypeName = suffix || 'Standard';
+    }
+    // ── H20. PU Tee ──────────────────────────────────────────────────────────
+    else if (U.includes('PU TEE')) {
+      const suffix = name.replace(/PU TEE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'PU Tee'; subtypeName = suffix || 'Standard';
+    }
+    // ── H21. PU Joint ────────────────────────────────────────────────────────
+    else if (U.includes('PU JOINT')) {
+      const suffix = name.replace(/PU JOINT/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'PU Joint'; subtypeName = suffix || 'Standard';
+    }
+    // ── H22. PU Pipe ─────────────────────────────────────────────────────────
+    else if (U.includes('PU PIPE')) {
+      const suffix = name.replace(/PU PIPE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'PU Pipe'; subtypeName = suffix || 'Standard';
+    }
+    // ── H23. Brass Male Hose Nipple ──────────────────────────────────────────
+    else if (U.includes('BRASS MALE HOSE NIPPLE')) {
+      const suffix = name.replace(/BRASS MALE HOSE NIPPLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Brass Male Hose Nipple'; subtypeName = suffix || 'Standard';
+    }
+    // ── H24. Brass Female Hose Nipple ────────────────────────────────────────
+    else if (U.includes('BRASS FEMALE HOSE NIPPLE')) {
+      const suffix = name.replace(/BRASS FEMALE HOSE NIPPLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Brass Female Hose Nipple'; subtypeName = suffix || 'Standard';
+    }
+    // ── H25. Car Washing Nozzle ──────────────────────────────────────────────
+    else if (U.includes('CAR WASHING NOZZLE') || U.includes('CAR WASH NOZZLE')) {
+      const suffix = name.replace(/CAR WASHING NOZZLE/gi, '').replace(/CAR WASH NOZZLE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Car Washing Nozzle'; subtypeName = suffix || 'Standard';
+    }
+    // ── H26. M S Socket ──────────────────────────────────────────────────────
+    else if (U.includes('M S SOCKET') || U.includes('MS SOCKET')) {
+      const suffix = name.replace(/M\s*S\s*SOCKET/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'M S Socket'; subtypeName = suffix || 'Standard';
+    }
+    // ── H27. Healtfo Faulet ──────────────────────────────────────────────────
+    else if (U.includes('HEALTFO') || U.includes('FAULET')) {
+      const suffix = name.replace(/HEALTFO FAULET/gi, '').replace(/HEALTFO/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Healtfo Faulet'; subtypeName = suffix || 'Standard';
+    }
+    // ── 18. Consumable Abrasive Wheels & Discs ─────────────────────────────────
     else if (U.includes('FLAP DISC')) {
-      mainName = 'Flap Disc'; subtypeName = name.replace(/FLAP DISC/gi, '').trim() || 'Standard';
+      mainName = 'Flap Disc';
+      subtypeName = name.replace(/FLAP DISC/gi, '').replace(/\s+/g, ' ').trim() || 'Standard';
     }
     else if (U.includes('MOP WHEEL')) {
-      mainName = 'Mop Wheel'; subtypeName = name.replace(/MOP WHEEL/gi, '').trim() || 'Standard';
+      mainName = 'Mop Wheel';
+      subtypeName = name.replace(/MOP WHEEL/gi, '').replace(/\s+/g, ' ').trim() || 'Standard';
     }
     else if (U.includes('CUT OFF WHEEL') || U.includes('CUT OF WHEEL')) {
-      mainName = 'Cut Off Wheel'; subtypeName = name.replace(/CUT O[F]+\s*WHEEL/gi, '').trim() || 'Standard';
+      mainName = 'Cut Off Wheel';
+      subtypeName = name.replace(/CUT O[F]+\s*WHEEL/gi, '').replace(/\s+/g, ' ').trim() || 'Standard';
     }
     else if (U.includes('DC WHEEL')) {
-      mainName = 'DC Wheel'; subtypeName = name.replace(/DC WHEEL/gi, '').trim() || 'Standard';
+      mainName = 'DC Wheel';
+      subtypeName = name.replace(/DC WHEEL/gi, '').replace(/\s+/g, ' ').trim() || 'Standard';
+    }
+
+    // ── 19. UCP / UCF / UCFL / UCT Bearing Housing (explicit, before separators) ───
+    else if (/^(UCP|UCF|UCFL|UCT)\s+\d+/i.test(name)) {
+      const m = name.match(/^(UCP|UCF|UCFL|UCT)\s+(.*)/i);
+      mainName = `${m[1].toUpperCase()} Bearing Housing`;
+      subtypeName = m[2].trim() || 'Standard';
     }
 
     // ── Structural separator: " - " ───────────────────────────────────────────
@@ -418,15 +581,9 @@ function buildGroupedProducts(list) {
       mainName = parts[0].trim();
       subtypeName = parts.slice(1).join('_').replace(/_/g, ' ').trim();
     }
-    // ── UCP / UCF / UCFL / UCT Bearing Housing ───────────────────────────────
-    else if (/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i.test(name)) {
-      const m = name.match(/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i);
-      mainName = `${m[1].toUpperCase()} Bearing Housing`;
-      subtypeName = m[2].trim();
-    }
     // ── General trailing numeric-unit size ────────────────────────────────────
     else {
-      const sizeRegex = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)\s*(?:MM|KG|MTR|METER|INCH|LTR|LITER|Nos|Pcs|Amp|A|HP|V|W|")(?:\s+.*)?)$/i;
+      const sizeRegex = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)\s*(?:MM|KG|MTR|METER|INCH|LTR|LITER|Nos|PCS|Pcs|Amp|A|HP|V|W|")(?:\s+.*)?)$/i;
       const dimRegex  = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)"?\s*X\s*(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+).*)$/i;
 
       let sizeMatched = false;
