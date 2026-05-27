@@ -1,7 +1,8 @@
 /**
- * Vardhman Family ERP — Excel Import Script
+ * Vardhman Family ERP — Excel Import Script with Images
  * Run: node utils/importExcel.js
  * Clears existing products and imports new ones from d:\Inventory_Management_System\client\src\Product_Details (1).xlsx
+ * Automatically maps unzipped images from PRODUCT_IMAGE.docx
  */
 const path = require('path');
 const fs = require('fs');
@@ -83,9 +84,99 @@ function parseQtyAndUnit(qtyStr) {
     unit = 'Liter';
   } else if (cleanStr.includes('roll')) {
     unit = 'Roll';
+  } else if (cleanStr.includes('packet') || cleanStr.includes('pkt')) {
+    unit = 'Box'; // packet mapped to box
+  } else if (cleanStr.includes('nos') || cleanStr.includes('pcs') || cleanStr.includes('pc')) {
+    unit = 'Piece';
   }
 
   return { quantity, unit };
+}
+
+// Smart image mapper based on keyword parsing from unzipped Word doc
+function getImageForProduct(name, category) {
+  const n = name.toUpperCase();
+  const cat = category.toUpperCase();
+
+  if (cat === 'CONSUMABLE') {
+    if (n.includes('CUT OFF WHEEL')) return '/uploads/products/image3.png';
+    if (n.includes('MOP WHEEL')) return '/uploads/products/image4.png';
+    if (n.includes('DC WHEEL') && n.includes('GREEN')) return '/uploads/products/image5.png';
+    if (n.includes('DC WHEEL') && n.includes('BLACK')) return '/uploads/products/image6.png';
+    if (n.includes('FLAP') || n.includes('DISC')) return '/uploads/products/image7.png';
+  }
+
+  if (cat === 'BEARING') {
+    if (n.includes('UCP') && n.includes('HOUSING')) return '/uploads/products/image8.png';
+    if (n.includes('UCP SMTB')) return '/uploads/products/image9.png';
+    if (n.includes('UCF') && n.includes('HOUSING')) return '/uploads/products/image10.png';
+    if (n.includes('UCF SMTB')) return '/uploads/products/image11.png';
+    if (n.includes('ZZ')) return '/uploads/products/image12.png';
+    if (n.includes('2RS')) return '/uploads/products/image13.webp';
+  }
+
+  if (cat === 'HYDRAULIC') {
+    if (n.includes('FIRE EXTINGUISHER') || n.includes('EXTINGUISHERS')) return '/uploads/products/image14.png';
+    if (n.includes('FIRE STOP')) return '/uploads/products/image15.png';
+    if (n.includes('PVC BRADIED')) return '/uploads/products/image16.png';
+    if (n.includes('LPG RUBBER')) return '/uploads/products/image17.png';
+    if (n.includes('PU PIPE')) return '/uploads/products/image18.png';
+    if (n.includes('LPG ADAPTOR')) return '/uploads/products/image19.png';
+    if (n.includes('M S BUSH')) return '/uploads/products/image20.png';
+    if (n.includes('TEFLON TAPE')) return '/uploads/products/image21.png';
+    if (n.includes('BRASS NUT NIPPLE')) return '/uploads/products/image22.png';
+    if (n.includes('LP NUT NIPPLE')) return '/uploads/products/image23.png';
+    if (n.includes('M S HEX NIPPLE')) return '/uploads/products/image24.png';
+    if (n.includes('SS 304 HEX NIPPLE')) return '/uploads/products/image25.png';
+    if (n.includes('M S MALE ELBOW')) return '/uploads/products/image26.png';
+    if (n.includes('FE MALE ELBOW')) return '/uploads/products/image27.png';
+    if (n.includes('M S MALE TEE')) return '/uploads/products/image28.png';
+    if (n.includes('PU TEE')) return '/uploads/products/image29.png';
+    if (n.includes('HOSE CLIPS') || n.includes('WORM DRIVE')) return '/uploads/products/image30.png';
+    if (n.includes('REGULATOR')) return '/uploads/products/image31.png';
+    if (n.includes('COUPLING')) return '/uploads/products/image32.png';
+    if (n.includes('HEALTFO FAULET') || n.includes('HEALTFO')) return '/uploads/products/image33.png';
+    if (n.includes('M S SOCKET')) return '/uploads/products/image34.png';
+    if (n.includes('M S DEAD PLUG')) return '/uploads/products/image35.png';
+    if (n.includes('PU JOINT')) return '/uploads/products/image36.png';
+    if (n.includes('AIR GUN')) return '/uploads/products/image37.png';
+  }
+
+  if (cat === 'ELECTRICAL') {
+    if (n.includes('SCHNEIDER') && n.includes('CONTECTOR')) return '/uploads/products/image39.png';
+    if (n.includes('SCHNEIDER') && n.includes('CONTACTOR')) return '/uploads/products/image39.png';
+    if (n.includes('MCB')) return '/uploads/products/image40.png';
+    if (n.includes('INDICATOR')) return '/uploads/products/image44.png';
+    if (n.includes('PUSH BUTTON')) return '/uploads/products/image42.png';
+    if (n.includes('CONTACTOR')) return '/uploads/products/image42.png';
+    if (n.includes('TRY SMALL') || n.includes('TRY BIG')) return '/uploads/products/image45.png';
+    if (n.includes('ELCB')) return '/uploads/products/image46.png';
+    if (n.includes('AVM') || n.includes('AV MIX')) return '/uploads/products/image47.png';
+    if (n.includes('CABLE TIE')) return '/uploads/products/image47.png';
+    if (n.includes('LIMIT SWITCH')) return '/uploads/products/image45.png';
+    if (n.includes('PANEL LOCK') || n.includes('LOCK')) return '/uploads/products/image47.png';
+    if (n.includes('CONNECTOR')) return '/uploads/products/image46.png';
+    if (n.includes('SPYRAL') || n.includes('SPIRAL')) return '/uploads/products/image47.png';
+    if (n.includes('EMERGENCY')) return '/uploads/products/image47.png';
+    if (n.includes('SELECTOR SWITCH')) return '/uploads/products/image49.png';
+    if (n.includes('R2NR')) return '/uploads/products/image47.png';
+    if (n.includes('AW')) return '/uploads/products/image47.png';
+    if (n.includes('A2V')) return '/uploads/products/image47.png';
+    if (n.includes('FAN') || n.includes('COOLING')) return '/uploads/products/image48.png';
+    if (n.includes('YELLOW A TO Z') || n.includes('SLIVE')) return '/uploads/products/image47.png';
+    if (n.includes('METER') && n.includes('VOLTAGE')) return '/uploads/products/image48.png';
+    if (n.includes('HTC')) return '/uploads/products/image52.png';
+    if (n.includes('MECO') || n.includes('KUSUM')) return '/uploads/products/image52.png';
+    if (n.includes('WIRE TAPE')) return '/uploads/products/image51.png';
+    if (n.includes('CHANNEL PATTI')) return '/uploads/products/image53.png';
+    if (n.includes('PLASTIC WIRE TRAY')) return '/uploads/products/image54.png';
+    if (n.includes('3P2N') || n.includes('5P2N')) return '/uploads/products/image47.png';
+    if (n.includes('PAKAD')) return '/uploads/products/image54.png';
+    if (n.includes('RING') || n.includes('CIRCLE')) return '/uploads/products/image54.png';
+    if (n.includes('F.T.I')) return '/uploads/products/image54.png';
+  }
+
+  return null;
 }
 
 async function importProducts() {
@@ -98,13 +189,13 @@ async function importProducts() {
     await mongoose.connect(MONGO_URI);
     console.log('✅ Connected successfully.');
 
-    // 1. Find an Admin user to assign as creator
+    // 1. Find or create Admin user
     let adminUser = await User.findOne({ role: 'admin' });
     if (!adminUser) {
       console.log('⚠️ No Admin user found. Querying first user...');
       adminUser = await User.findOne({});
       if (!adminUser) {
-        console.log('⚠️ Creating a default admin user for product references...');
+        console.log('⚠️ Creating a default admin user...');
         adminUser = await User.create({
           name: 'Admin User',
           email: 'admin@vardhman.com',
@@ -116,7 +207,7 @@ async function importProducts() {
     }
     console.log(`👤 Mapped creator user: ${adminUser.name} (${adminUser.email})`);
 
-    // 2. Clear existing products (User requested "Remove the data and add the one in the sheet")
+    // 2. Clear existing products (User requested reset)
     console.log('🗑️  Deleting all existing products from database...');
     const deleteRes = await Product.deleteMany({});
     console.log(`✅ Deleted ${deleteRes.deletedCount} products.`);
@@ -133,7 +224,7 @@ async function importProducts() {
 
     const sheetMapping = {
       'Electrical': 'Electrical',
-      'Hydrolic': 'Hydraulic', // correctly map 'Hydrolic' to 'Hydraulic'
+      'Hydrolic': 'Hydraulic',
       'Bearing': 'Bearing',
       'Consumable': 'Consumable'
     };
@@ -144,30 +235,64 @@ async function importProducts() {
     for (const sheet of workbook.worksheets) {
       const category = sheetMapping[sheet.name];
       if (!category) {
-        console.log(`⏭️ Skipping worksheet: "${sheet.name}" (not mapped)`);
+        console.log(`⏭️ Skipping worksheet: "${sheet.name}"`);
         continue;
       }
 
       console.log(`📦 Processing sheet: "${sheet.name}" -> Category: "${category}"`);
       let sheetProductsCount = 0;
+      let currentParent = null;
 
-      // Rows 1, 2, 3 are headers. Iterate from Row 4 onwards.
+      // Columns are:
+      // - Column A (1): SR.NO
+      // - Column B (2): PRODUCT NAME / ITEM
+      // - Column C (3): QTY
+      
       sheet.eachRow((row, rowNumber) => {
         if (rowNumber < 4) return; // Skip headers
 
-        const srNo = row.getCell(2).value; // Serial No is column B (2)
-        const nameVal = row.getCell(3).value; // Product Name / Item is column C (3)
-        const qtyVal = row.getCell(4).value; // Quantity is column D (4)
+        const colA = row.getCell(1).value; // Serial number in Col A
+        const colB = row.getCell(2).value; // Product Name / Item in Col B
+        const colC = row.getCell(3).value; // Quantity in Col C
 
-        if (!nameVal) return; // Skip empty row
+        if (!colB) return; // Skip empty row
 
-        const name = nameVal.toString().trim();
+        const name = colB.toString().trim();
         if (!name) return;
 
-        const { quantity, unit } = parseQtyAndUnit(qtyVal);
+        const srNo = colA ? colA.toString().trim() : '';
+        const { quantity, unit } = parseQtyAndUnit(colC);
+
+        let finalName = name;
+        let isStandAlone = false;
+
+        if (sheet.name === 'Electrical') {
+          if (srNo) {
+            // Top-level item
+            if (colC !== null && colC !== undefined && colC.toString().trim() !== '') {
+              // It has a quantity value, so it is a standalone product
+              currentParent = null;
+              isStandAlone = true;
+            } else {
+              // It has no quantity, so it's a parent header for subsequent child rows
+              currentParent = name;
+              // We do not insert the parent row directly, we wait for children
+              return;
+            }
+          } else {
+            // Child row (no serial number). Append to current parent
+            finalName = currentParent ? `${currentParent} - ${name}` : name;
+          }
+        } else {
+          // Flat sheets: every row is a standalone product
+          isStandAlone = true;
+        }
+
+        // Map matching image if available
+        const imagePath = getImageForProduct(finalName, category);
 
         allProductsToInsert.push({
-          name,
+          name: finalName,
           category,
           sellingPrice: 0,
           purchasePrice: 0,
@@ -176,7 +301,8 @@ async function importProducts() {
           description: `Imported from Excel - Sheet: ${sheet.name}, SR.NO: ${srNo || 'N/A'}`,
           reorderLevel: 10,
           createdBy: adminUser._id,
-          status: 'active'
+          status: 'active',
+          image: imagePath || null
         });
         sheetProductsCount++;
       });
@@ -191,17 +317,20 @@ async function importProducts() {
 
     // 6. Category breakdown report
     const stats = {};
+    let imagedCount = 0;
     inserted.forEach(p => {
       stats[p.category] = (stats[p.category] || 0) + 1;
+      if (p.image) imagedCount++;
     });
 
     console.log('\n📊 Import breakdown by Category:');
     Object.keys(stats).forEach(cat => {
       console.log(`  - ${cat}: ${stats[cat]} products`);
     });
+    console.log(`\n🖼️  Products successfully mapped with images: ${imagedCount} of ${inserted.length}`);
 
     console.log('\n==================================================');
-    console.log('✨ DATABASE RE-SEEDED WITH EXCEL DATA SUCCESSFULLY! ✨');
+    console.log('✨ DATABASE RE-SEEDED WITH COMPLETE EXCEL DATA & IMAGES! ✨');
     console.log('==================================================\n');
 
     process.exit(0);

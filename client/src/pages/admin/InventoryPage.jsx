@@ -69,7 +69,7 @@ export default function InventoryPage() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead><tr>
-              {['Product','Category','Current Qty','Reorder Level','Status','Stock Value'].map(h => <th key={h} className="table-th">{h}</th>)}
+              {['Product','Category','Current Qty','Reorder Level','Status','Unit Price'].map(h => <th key={h} className="table-th">{h}</th>)}
             </tr></thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? Array(8).fill(0).map((_, i) => (
@@ -102,7 +102,7 @@ export default function InventoryPage() {
                     <td className="table-td">
                       {isOut ? <StatusBadge status="out-of-stock" /> : isLow ? <StatusBadge status="low-stock" /> : <StatusBadge status="active" />}
                     </td>
-                    <td className="table-td font-semibold text-gray-900">₹{(p.quantity * p.sellingPrice).toLocaleString('en-IN')}</td>
+                    <td className="table-td font-semibold text-gray-900">₹{p.sellingPrice.toLocaleString('en-IN')}</td>
                   </tr>
                 );
               })}
