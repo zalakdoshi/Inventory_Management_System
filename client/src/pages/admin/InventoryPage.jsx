@@ -82,7 +82,22 @@ export default function InventoryPage() {
                     <td className="table-td">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                          {p.image ? <img src={`${API_BASE}${p.image}`} className="w-full h-full object-cover" /> : <Package size={16} className="m-1.5 text-gray-400" />}
+                          {p.image ? (
+                            <img
+                              src={`${API_BASE}${p.image}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const localPath = `${window.location.origin}${p.image}`;
+                                if (e.target.src !== localPath) {
+                                  e.target.src = p.image;
+                                } else {
+                                  e.target.src = '';
+                                }
+                              }}
+                            />
+                          ) : (
+                            <Package size={16} className="m-1.5 text-gray-400" />
+                          )}
                         </div>
                         <div>
                           <p className="font-medium text-gray-900 text-sm">{p.name}</p>

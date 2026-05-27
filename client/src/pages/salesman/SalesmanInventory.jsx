@@ -27,7 +27,12 @@ function ProductCard({ group }) {
               alt={group.name}
               className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
               onError={(e) => {
-                e.target.src = '/placeholder-product.png';
+                const localPath = `${window.location.origin}${selectedProduct.image}`;
+                if (e.target.src !== localPath) {
+                  e.target.src = selectedProduct.image;
+                } else {
+                  e.target.src = '/placeholder-product.png';
+                }
               }}
             />
           ) : (
@@ -410,6 +415,7 @@ export default function SalesmanInventory() {
   };
 
   const groupedProducts = groupProducts(products);
+  console.log('🔎 DEPLOYED CATALOG DEBUG - Grouped Products:', groupedProducts);
 
   return (
     <div className="space-y-6">

@@ -151,7 +151,19 @@ export default function ProductsPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                         {product.image ? (
-                          <img src={`${API_BASE}${product.image}`} alt={product.name} className="w-full h-full object-cover" />
+                          <img
+                            src={`${API_BASE}${product.image}`}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const localPath = `${window.location.origin}${product.image}`;
+                              if (e.target.src !== localPath) {
+                                e.target.src = product.image;
+                              } else {
+                                e.target.src = '';
+                              }
+                            }}
+                          />
                         ) : <Package size={20} className="m-2.5 text-gray-400" />}
                       </div>
                       <div>
@@ -207,7 +219,19 @@ export default function ProductsPage() {
             <div className="space-y-4">
               <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 flex items-center justify-center">
                 {viewProduct.image ? (
-                  <img src={`${API_BASE}${viewProduct.image}`} alt={viewProduct.name} className="w-full h-full object-contain p-4" />
+                  <img
+                    src={`${API_BASE}${viewProduct.image}`}
+                    alt={viewProduct.name}
+                    className="w-full h-full object-contain p-4"
+                    onError={(e) => {
+                      const localPath = `${window.location.origin}${viewProduct.image}`;
+                      if (e.target.src !== localPath) {
+                        e.target.src = viewProduct.image;
+                      } else {
+                        e.target.src = '';
+                      }
+                    }}
+                  />
                 ) : (
                   <div className="text-center text-gray-300">
                     <Package size={80} className="mx-auto mb-2" />

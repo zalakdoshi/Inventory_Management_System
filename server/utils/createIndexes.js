@@ -14,7 +14,7 @@ const createIndexes = async () => {
 
     // Product indexes
     await Product.collection.createIndex({ name: 1 });
-    await Product.collection.createIndex({ productId: 1 });
+    await Product.collection.createIndex({ productId: 1 }, { unique: true });
     await Product.collection.createIndex({ barcode: 1 });
     await Product.collection.createIndex({ category: 1 });
     await Product.collection.createIndex({ status: 1 });
@@ -45,7 +45,7 @@ const createIndexes = async () => {
 
     logger.info('✅ Database indexes created successfully');
   } catch (error) {
-    logger.error('Error creating indexes:', error.message);
+    logger.error(`Error creating indexes: ${error.message}`);
   }
 };
 
