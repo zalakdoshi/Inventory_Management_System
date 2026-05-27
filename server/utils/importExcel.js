@@ -29,7 +29,7 @@ function parseQtyAndUnit(qtyStr) {
   if (qtyStr === undefined || qtyStr === null) {
     return { quantity: 0, unit: 'Piece' };
   }
-  
+
   let str = qtyStr.toString().trim();
   if (!str) {
     return { quantity: 0, unit: 'Piece' };
@@ -42,7 +42,7 @@ function parseQtyAndUnit(qtyStr) {
         .map(term => parseFloat(term.trim()))
         .filter(val => !isNaN(val))
         .reduce((acc, curr) => acc + curr, 0);
-      
+
       // Attempt to guess unit based on keywords in the rest of the string
       let unit = 'Piece';
       const upperStr = str.toUpperCase();
@@ -99,111 +99,67 @@ function getImageForProduct(name, category) {
   const cat = category.toUpperCase();
 
   if (cat === 'CONSUMABLE') {
-    if (n.includes('CUT OFF WHEEL')) return '/uploads/products/image3.png';
-    if (n.includes('MOP WHEEL')) return '/uploads/products/image4.png';
-    if (n.includes('DC WHEEL') && n.includes('GREEN')) return '/uploads/products/image5.png';
-    if (n.includes('DC WHEEL') && n.includes('BLACK')) return '/uploads/products/image6.png';
-    if (n.includes('FLAP') || n.includes('DISC')) return '/uploads/products/image7.png';
+    if (n.includes('CUT OFF WHEEL') || n.includes('CUT OF WHEEL')) return '/uploads/products/Cut off green wheel.png';
+    if (n.includes('MOP WHEEL')) return '/uploads/products/Mop Wheel.png';
+    if (n.includes('DC WHEEL') && n.includes('GREEN')) return '/uploads/products/DC wheel green.png';
+    if (n.includes('DC WHEEL') && (n.includes('BLACK') || n.includes('BACK'))) return '/uploads/products/Dc wheel black.png';
+    if (n.includes('FLAP') || n.includes('DISC')) return '/uploads/products/Flap disc.png';
   }
 
   if (cat === 'BEARING') {
-    if (n.includes('UCP') && n.includes('HOUSING')) return '/uploads/products/image8.png';
-    if (n.includes('UCP SMTB')) return '/uploads/products/image9.png';
-    if (n.includes('UCF') && n.includes('HOUSING')) return '/uploads/products/image10.png';
-    if (n.includes('UCF SMTB')) return '/uploads/products/image11.png';
-    if (n.includes('ZZ')) return '/uploads/products/image12.png';
-    if (n.includes('2RS')) return '/uploads/products/image13.webp';
+    if (n.includes('UCP') && (n.includes('HOUSING') || n.includes('SKF') || n.includes('BRG'))) return '/uploads/products/UCP BRG HOUSING.png';
+    if (n.includes('UCP') && n.includes('SMTB')) return '/uploads/products/UCP SMTB.png';
+    if (n.includes('UCF') && !n.includes('UCFL') && !n.includes('UCT') && (n.includes('HOUSING') || n.includes('SKF') || n.includes('BRG')) && !n.includes('SMTB')) return '/uploads/products/UCF SKF BRG HOUSING.png';
+    if (n.includes('UCF') && !n.includes('UCFL') && !n.includes('UCT') && n.includes('SMTB')) return '/uploads/products/UCF SMTB.png';
+    if (n.includes('ZZ')) return '/uploads/products/BEARING_ZZ.png';
+    if (n.includes('2RS')) return '/uploads/products/BEARING_2RS.png';
   }
 
   if (cat === 'HYDRAULIC') {
-    if (n.includes('FIRE EXTINGUISHER') || n.includes('EXTINGUISHERS')) return '/uploads/products/image14.png';
-    if (n.includes('FIRE STOP')) return '/uploads/products/image15.png';
-    if (n.includes('PVC BRADIED')) return '/uploads/products/image16.png';
-    if (n.includes('LPG RUBBER')) return '/uploads/products/image17.png';
-    if (n.includes('PU PIPE')) return '/uploads/products/image18.png';
-    if (n.includes('LPG ADAPTOR')) return '/uploads/products/image19.png';
-    if (n.includes('M S BUSH')) return '/uploads/products/image20.png';
-    if (n.includes('TEFLON TAPE')) return '/uploads/products/image21.png';
-    if (n.includes('BRASS NUT NIPPLE')) return '/uploads/products/image22.png';
-    if (n.includes('LP NUT NIPPLE')) return '/uploads/products/image23.png';
-    if (n.includes('M S HEX NIPPLE')) return '/uploads/products/image24.png';
-    if (n.includes('SS 304 HEX NIPPLE')) return '/uploads/products/image25.png';
-    if (n.includes('M S MALE ELBOW')) return '/uploads/products/image26.png';
-    if (n.includes('FE MALE ELBOW')) return '/uploads/products/image27.png';
-    if (n.includes('M S MALE TEE')) return '/uploads/products/image28.png';
-    if (n.includes('PU TEE')) return '/uploads/products/image29.png';
-    if (n.includes('HOSE CLIPS') || n.includes('WORM DRIVE')) return '/uploads/products/image30.png';
-    if (n.includes('REGULATOR')) return '/uploads/products/image31.png';
-    if (n.includes('COUPLING')) return '/uploads/products/image32.png';
-    if (n.includes('HEALTFO FAULET') || n.includes('HEALTFO')) return '/uploads/products/image33.png';
-    if (n.includes('M S SOCKET')) return '/uploads/products/image34.png';
-    if (n.includes('M S DEAD PLUG')) return '/uploads/products/image36.png'; // Corrected from 35 to 36
-    if (n.includes('PU JOINT')) return '/uploads/products/image37.png'; // Corrected from 36 to 37
-    if (n.includes('AIR GUN')) return '/uploads/products/image38.png'; // Corrected from 37 to 38
+    if (n.includes('FIRE EXTINGUISHER') || n.includes('EXTINGUISHERS')) return '/uploads/products/ABC FIRE EXTINGUISHERS.webp';
+    if (n.includes('FIRE STOP')) return '/uploads/products/LPG RUBBER HOSE.png';
+    if (n.includes('PVC BRADIED') || n.includes('PVC BRAIDED')) return '/uploads/products/PVC BRADIED HOSE.png';
+    if (n.includes('LPG RUBBER')) return '/uploads/products/LPG RUBBER HOSE.png';
+    if (n.includes('PU PIPE')) return '/uploads/products/PU Pipe.png';
+    if (n.includes('LPG ADAPTOR')) return '/uploads/products/LPG ADAPTOR .png';
+    if (n.includes('M S BUSH') || n.includes('MS BUSH') || n.includes('M S BLUSH')) return '/uploads/products/M S BLUSH.png';
+    if (n.includes('TEFLON TAPE')) return '/uploads/products/TEFLON TAPE.png';
+    if (n.includes('BRASS NUT NIPPLE')) return '/uploads/products/BRASS NUT NIPPLE .png';
+    if (n.includes('LP NUT NIPPLE')) return '/uploads/products/LP NUT NIPPLE .png';
+    if (n.includes('M S HEX NIPPLE') || n.includes('MS HEX NIPPLE')) return '/uploads/products/M S HEX NIPPLE.png';
+    if (n.includes('SS 304 HEX NIPPLE') || n.includes('SS304 HEX NIPPLE')) return '/uploads/products/SS 304 HEX NIPPLE.png';
+    if (n.includes('M S MALE ELBOW') || n.includes('MS MALE ELBOW')) return '/uploads/products/M S MALE ELBOW            .png';
+    if (n.includes('FE MALE ELBOW') || n.includes('FEMALE ELBOW')) return '/uploads/products/M S FEMALE ELBOW.png';
+    if (n.includes('M S MALE TEE') || n.includes('MS MALE TEE')) return '/uploads/products/M S MALE TEE .png';
+    if (n.includes('PU TEE')) return '/uploads/products/PU TEE .png';
+    if (n.includes('HOSE CLIPS') || n.includes('WORM DRIVE')) return '/uploads/products/JOLLY WORM DRIVE HOSE CLIPS .png';
+    if (n.includes('REGULATOR')) return '/uploads/products/REGULATOR.png';
+    if (n.includes('COUPLING')) return '/uploads/products/COUPLING.png';
+    if (n.includes('HEALTFO FAULET') || n.includes('HEALTFO')) return '/uploads/products/HEALTFO FAULET .png';
+    if (n.includes('M S SOCKET') || n.includes('MS SOCKET')) return '/uploads/products/M S SOCKET.png';
+    if (n.includes('M S DEAD PLUG') || n.includes('MS DEAD PLUG')) return '/uploads/products/M S DEAD PLUG.png';
   }
 
   if (cat === 'ELECTRICAL') {
-    // 1. VFD
-    if (n.includes('VFD')) return '/uploads/products/image54.png';
-    
-    // 2. Open Close Name Plate / Circle Ring
-    if (n.includes('OPEN CLOSE') || n.includes('CIRCLE') || n.includes('RING')) return '/uploads/products/image53.png';
-    
-    // 3. PAKAD / Pliers (e.g. E22 PAKAD, LVG22 PAKAD)
-    if (n.includes('PAKAD')) return '/uploads/products/image51.png';
-    
-    // 4. Plastic Wire Tray
-    if (n.includes('PLASTIC WIRE TRAY') || n.includes('WIRE TRAY')) return '/uploads/products/image52.png';
-    
-    // 5. Channel Patti / HTC Channel Patti
-    if (n.includes('CHANNEL PATTI')) return '/uploads/products/image48.png';
-    
-    // 6. Wire Tape / Insulation Tape
-    if (n.includes('WIRE TAPE') || n.includes('TAPE')) return '/uploads/products/image49.png';
-    
-    // 7. Clamp Meter / HTC / Meter (Voltage & Amp)
-    if (n.includes('HTC') || n.includes('CLAMP METER')) return '/uploads/products/image50.png';
-    
-    // 8. Selector Switch
-    if (n.includes('SELECTOR SWITCH') || n.includes('3P2N') || n.includes('5P2N')) return '/uploads/products/image47.png';
-    
-    // 9. Fan / Cooling Fan
-    if (n.includes('FAN') || n.includes('COOLING')) return '/uploads/products/image46.png';
-    
-    // 10. Digital Multimeter / Kusum / Meco
-    if (n.includes('METER') || n.includes('MECO') || n.includes('KUSUM')) return '/uploads/products/image45.png';
-    
-    // 11. Emergency Stop Button
-    if (n.includes('EMERGENCY')) return '/uploads/products/image44.png';
-    
-    // 12. ELCB / AVM / Protection Devices
-    if (n.includes('ELCB') || n.includes('AVM')) return '/uploads/products/image43.png';
-    
-    // 13. Cable Tie
-    if (n.includes('CABLE TIE')) return '/uploads/products/image42.png';
-    
-    // 14. Indicator / Indicators
-    if (n.includes('INDICATOR')) return '/uploads/products/image41.png';
-    
-    // 15. Push Button / Push Buttons
-    if (n.includes('PUSH BUTTON')) return '/uploads/products/image40.png';
-    
-    // 16. Schneider Contactor
-    if (n.includes('SCHNEIDER') && (n.includes('CONTACTOR') || n.includes('CONTECTOR'))) return '/uploads/products/image37.png';
-    
-    // 17. Contactor (non-Schneider)
-    if (n.includes('CONTACTOR') || n.includes('CONTECTOR')) return '/uploads/products/image39.png';
-    
-    // 18. VAF Meter
-    if (n.includes('VAF')) return '/uploads/products/image38.png';
-    
-    // 19. MCB (Single, Double, Three, Four pole MCBs)
-    if (n.includes('MCB')) return '/uploads/products/image36.png';
-
-    // Fallbacks for miscellaneous electrical items
-    if (n.includes('LIMIT SWITCH')) return '/uploads/products/image45.png';
-    if (n.includes('CONNECTOR')) return '/uploads/products/image46.png';
-    if (n.includes('PANEL LOCK') || n.includes('LOCK') || n.includes('SPYRAL') || n.includes('SPIRAL') || n.includes('R2NR') || n.includes('AW') || n.includes('A2V') || n.includes('F.T.I')) return '/uploads/products/image47.png';
+    if (n.includes('VFD')) return '/uploads/products/VFD.png';
+    if (n.includes('OPEN CLOSE') || n.includes('CIRCLE') || n.includes('RING')) return '/uploads/products/OPEN CLOSE NAME PLATE.png';
+    if (n.includes('PAKAD') || n.includes('PAKKAD')) return '/uploads/products/E22 PAKKAD.png';
+    if (n.includes('PLASTIC WIRE TRAY') || n.includes('WIRE TRAY')) return '/uploads/products/PLASTIC WIRE TRAY.png';
+    if (n.includes('CHANNEL PATTI')) return '/uploads/products/CHANNEL PATTI.png';
+    if (n.includes('WIRE TAPE') || n.includes('TAPE')) return '/uploads/products/WIRE TAP BOX.png';
+    if (n.includes('HTC') || n.includes('CLAMP METER')) return '/uploads/products/HTC (Voltage & Amp).png';
+    if (n.includes('SELECTOR SWITCH') || n.includes('3P2N') || n.includes('5P2N')) return '/uploads/products/SELECTOR SWITCH.png';
+    if (n.includes('FAN') || n.includes('COOLING')) return '/uploads/products/COOLING FAN.png';
+    if (n.includes('METER') || n.includes('MECO') || n.includes('KUSUM')) return '/uploads/products/Meter (Voltage & Amp).png';
+    if (n.includes('EMERGENCY')) return '/uploads/products/EMERGENCY STOP BUTTON.png';
+    if (n.includes('ELCB') || n.includes('AVM')) return '/uploads/products/ELCB.png';
+    if (n.includes('CABLE TIE')) return '/uploads/products/CABLE TIE.png';
+    if (n.includes('INDICATOR')) return '/uploads/products/INDICATOR.png';
+    if (n.includes('PUSH BUTTON')) return '/uploads/products/PUSH BUTTON.png';
+    if (n.includes('SCHNEIDER') && (n.includes('CONTACTOR') || n.includes('CONTECTOR'))) return '/uploads/products/Schneider Contactor.png';
+    if (n.includes('CONTACTOR') || n.includes('CONTECTOR')) return '/uploads/products/Contactor.png';
+    if (n.includes('VAF')) return '/uploads/products/VAF METER.png';
+    if (n.includes('MCB')) return '/uploads/products/MCB.png';
   }
 
   return null;
@@ -270,7 +226,7 @@ async function importProducts() {
       }
 
       console.log(`📦 Processing sheet: "${sheet.name}" -> Category: "${category}"`);
-      
+
       // Load all rows into memory first
       const rows = [];
       sheet.eachRow((row, rowNumber) => {

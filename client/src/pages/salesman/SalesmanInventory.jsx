@@ -157,6 +157,65 @@ function commonWordPrefix(a, b) {
   return a.trim().split(/\s+/).slice(0, i).join(' ');
 }
 
+// Helper to tokenize strings for natural numeric sorting (handles integers, decimals, fractions like 1/2, and text)
+function tokenize(str) {
+  const s = (str || '').toLowerCase().trim();
+  const regex = /(\d+\/\d+|\d+(?:\.\d+)?|\D+)/g;
+  const tokens = [];
+  let match;
+  while ((match = regex.exec(s)) !== null) {
+    const part = match[0];
+    if (/^\d+\/\d+$/.test(part)) {
+      const [num, den] = part.split('/').map(Number);
+      tokens.push({ type: 'number', val: den !== 0 ? num / den : 0, raw: part });
+    } else if (/^\d+(?:\.\d+)?$/.test(part)) {
+      tokens.push({ type: 'number', val: parseFloat(part), raw: part });
+    } else {
+      tokens.push({ type: 'text', val: part, raw: part });
+    }
+  }
+  return tokens;
+}
+
+// Compare two strings naturally
+function naturalCompare(a, b) {
+  const poleOrder = {
+    'single pole mcb': 1,
+    'double pole mcb': 2,
+    'duble pole mcb': 2,
+    'three pole mcb': 3,
+    'triple pole mcb': 3,
+    'four pole mcb': 4
+  };
+  const valA = (a || '').toString().toLowerCase().trim();
+  const valB = (b || '').toString().toLowerCase().trim();
+  if (poleOrder[valA] !== undefined && poleOrder[valB] !== undefined) {
+    return poleOrder[valA] - poleOrder[valB];
+  }
+
+  const tokensA = tokenize(a);
+  const tokensB = tokenize(b);
+  const len = Math.max(tokensA.length, tokensB.length);
+  for (let i = 0; i < len; i++) {
+    const tA = tokensA[i];
+    const tB = tokensB[i];
+    if (tA === undefined) return -1;
+    if (tB === undefined) return 1;
+
+    if (tA.type === 'number' && tB.type === 'number') {
+      if (tA.val !== tB.val) {
+        return tA.val - tB.val;
+      }
+    } else if (tA.type === 'text' && tB.type === 'text') {
+      const cmp = tA.val.localeCompare(tB.val, undefined, { sensitivity: 'base' });
+      if (cmp !== 0) return cmp;
+    } else {
+      return tA.type === 'number' ? -1 : 1;
+    }
+  }
+  return 0;
+}
+
 // ─── Smart 2-Pass Grouping Engine ────────────────────────────────────────────
 // Pass 1A: scan all products per category to build a shared-prefix lookup table.
 // Pass 1B: parse each product → { mainName, subtypeName } using:
@@ -327,14 +386,6 @@ function buildGroupedProducts(list) {
     else if (U.startsWith('F.T.I')) {
       const suffix = name.replace(/F\.T\.I/gi, '').trim().replace(/^[-\s]+/, '');
       mainName = 'F.T.I'; subtypeName = suffix || 'Standard';
-    }
-    // ── 6. Others (Electrical) ────────────────────────────────────────────────
-    else if (U.includes('LIMIT SWITCH') || U.includes('PANEL LOCK') || U.includes('CONNECTOR LOCK')) {
-      let v = name;
-      if (U.includes('LIMIT SWITCH')) v = 'Limit Switch 8108';
-      else if (U.includes('PANEL LOCK')) v = 'Panel Lock';
-      else if (U.includes('CONNECTOR LOCK')) v = 'Connector Lock';
-      mainName = 'Others'; subtypeName = v;
     }
     // ── 7. Spherical Bearing ──────────────────────────────────────────────────
     else if (U.startsWith('BEARING 22211') || U.startsWith('BEARING 22217')) {
@@ -624,7 +675,26 @@ function buildGroupedProducts(list) {
     groups[key].subtypes.push({ ...p, subtypeName: p._subtypeName });
   });
 
-  return Object.values(groups);
+  const sortedGroups = Object.values(groups).map(group => {
+    // Sort subtypes within each group in ascending order of their size
+    group.subtypes.sort((a, b) => naturalCompare(a.subtypeName, b.subtypeName));
+    return group;
+  });
+
+  // Sort groups:
+  // 1. First by category (Electrical, Hydraulic, Bearing, Consumable order)
+  // 2. Then by product name (name) naturally
+  sortedGroups.sort((a, b) => {
+    const catOrder = ['Electrical', 'Hydraulic', 'Bearing', 'Consumable'];
+    const idxA = catOrder.indexOf(a.category);
+    const idxB = catOrder.indexOf(b.category);
+    if (idxA !== idxB) {
+      return idxA - idxB;
+    }
+    return naturalCompare(a.name, b.name);
+  });
+
+  return sortedGroups;
 }
 
 export default function SalesmanInventory() {
