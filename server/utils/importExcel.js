@@ -143,20 +143,67 @@ function getImageForProduct(name, category) {
   }
 
   if (cat === 'ELECTRICAL') {
-    if (n.includes('SCHNEIDER') && (n.includes('CONTECTOR') || n.includes('CONTACTOR'))) return '/uploads/products/image40.png';
-    if (n.includes('MCB')) return '/uploads/products/image39.png'; // Corrected from 40 to 39
-    if (n.includes('VAF') || n.includes('METER') || n.includes('HTC') || n.includes('MECO') || n.includes('KUSUM')) return '/uploads/products/image41.png';
-    if (n.includes('INDICATOR')) return '/uploads/products/image43.png'; // Corrected from 44 to 43
-    if (n.includes('PUSH BUTTON')) return '/uploads/products/image42.png'; // Corrected from 42 to 42
-    if (n.includes('CONTACTOR')) return '/uploads/products/image44.png'; // Corrected from 42 to 44 (non-schneider contactors)
-    if (n.includes('TRY SMALL') || n.includes('TRY BIG') || n.includes('LIMIT SWITCH')) return '/uploads/products/image45.png';
-    if (n.includes('ELCB') || n.includes('CONNECTOR')) return '/uploads/products/image46.png';
-    if (n.includes('AVM') || n.includes('AV MIX') || n.includes('CABLE TIE') || n.includes('PANEL LOCK') || n.includes('LOCK') || n.includes('SPYRAL') || n.includes('SPIRAL') || n.includes('EMERGENCY') || n.includes('R2NR') || n.includes('AW') || n.includes('A2V') || n.includes('YELLOW A TO Z') || n.includes('3P2N') || n.includes('5P2N')) return '/uploads/products/image47.png';
-    if (n.includes('FAN') || n.includes('COOLING')) return '/uploads/products/image48.png';
-    if (n.includes('SELECTOR SWITCH')) return '/uploads/products/image49.png';
-    if (n.includes('WIRE TAPE')) return '/uploads/products/image51.png';
-    if (n.includes('CHANNEL PATTI')) return '/uploads/products/image53.png';
-    if (n.includes('PLASTIC WIRE TRAY') || n.includes('PAKAD') || n.includes('RING') || n.includes('CIRCLE') || n.includes('F.T.I')) return '/uploads/products/image54.png';
+    // 1. VFD
+    if (n.includes('VFD')) return '/uploads/products/image54.png';
+    
+    // 2. Open Close Name Plate / Circle Ring
+    if (n.includes('OPEN CLOSE') || n.includes('CIRCLE') || n.includes('RING')) return '/uploads/products/image53.png';
+    
+    // 3. PAKAD / Pliers (e.g. E22 PAKAD, LVG22 PAKAD)
+    if (n.includes('PAKAD')) return '/uploads/products/image51.png';
+    
+    // 4. Plastic Wire Tray
+    if (n.includes('PLASTIC WIRE TRAY') || n.includes('WIRE TRAY')) return '/uploads/products/image52.png';
+    
+    // 5. Channel Patti / HTC Channel Patti
+    if (n.includes('CHANNEL PATTI')) return '/uploads/products/image48.png';
+    
+    // 6. Wire Tape / Insulation Tape
+    if (n.includes('WIRE TAPE') || n.includes('TAPE')) return '/uploads/products/image49.png';
+    
+    // 7. Clamp Meter / HTC / Meter (Voltage & Amp)
+    if (n.includes('HTC') || n.includes('CLAMP METER')) return '/uploads/products/image50.png';
+    
+    // 8. Selector Switch
+    if (n.includes('SELECTOR SWITCH') || n.includes('3P2N') || n.includes('5P2N')) return '/uploads/products/image47.png';
+    
+    // 9. Fan / Cooling Fan
+    if (n.includes('FAN') || n.includes('COOLING')) return '/uploads/products/image46.png';
+    
+    // 10. Digital Multimeter / Kusum / Meco
+    if (n.includes('METER') || n.includes('MECO') || n.includes('KUSUM')) return '/uploads/products/image45.png';
+    
+    // 11. Emergency Stop Button
+    if (n.includes('EMERGENCY')) return '/uploads/products/image44.png';
+    
+    // 12. ELCB / AVM / Protection Devices
+    if (n.includes('ELCB') || n.includes('AVM')) return '/uploads/products/image43.png';
+    
+    // 13. Cable Tie
+    if (n.includes('CABLE TIE')) return '/uploads/products/image42.png';
+    
+    // 14. Indicator / Indicators
+    if (n.includes('INDICATOR')) return '/uploads/products/image41.png';
+    
+    // 15. Push Button / Push Buttons
+    if (n.includes('PUSH BUTTON')) return '/uploads/products/image40.png';
+    
+    // 16. Schneider Contactor
+    if (n.includes('SCHNEIDER') && (n.includes('CONTACTOR') || n.includes('CONTECTOR'))) return '/uploads/products/image37.png';
+    
+    // 17. Contactor (non-Schneider)
+    if (n.includes('CONTACTOR') || n.includes('CONTECTOR')) return '/uploads/products/image39.png';
+    
+    // 18. VAF Meter
+    if (n.includes('VAF')) return '/uploads/products/image38.png';
+    
+    // 19. MCB (Single, Double, Three, Four pole MCBs)
+    if (n.includes('MCB')) return '/uploads/products/image36.png';
+
+    // Fallbacks for miscellaneous electrical items
+    if (n.includes('LIMIT SWITCH')) return '/uploads/products/image45.png';
+    if (n.includes('CONNECTOR')) return '/uploads/products/image46.png';
+    if (n.includes('PANEL LOCK') || n.includes('LOCK') || n.includes('SPYRAL') || n.includes('SPIRAL') || n.includes('R2NR') || n.includes('AW') || n.includes('A2V') || n.includes('F.T.I')) return '/uploads/products/image47.png';
   }
 
   return null;
