@@ -216,8 +216,8 @@ const exportReport = async (req, res) => {
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="vardhman_${type}_report_${Date.now()}.xlsx"`);
-    await workbook.xlsx.write(res);
-    res.end();
+    const buffer = await workbook.xlsx.writeBuffer();
+    res.send(buffer);
   } catch (error) {
     logger.error('Export error:', error);
     res.status(500).json({ success: false, message: 'Export failed.' });
