@@ -12,7 +12,7 @@ const API_BASE =
 function ProductCard({ group }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
   const selectedProduct = group.subtypes[selectedIdx] || group.subtypes[0];
-  
+
   const isLow = selectedProduct.quantity <= selectedProduct.reorderLevel;
   const isOut = selectedProduct.quantity === 0;
 
@@ -40,7 +40,7 @@ function ProductCard({ group }) {
               <Package size={60} />
             </div>
           )}
-          
+
           {/* Stock Status Badge */}
           <div
             className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
@@ -130,6 +130,281 @@ function ProductCard({ group }) {
   );
 }
 
+// ─── Helper: longest common word-level prefix ────────────────────────────────
+function commonWordPrefix(a, b) {
+  const wa = a.trim().toUpperCase().split(/\s+/);
+  const wb = b.trim().toUpperCase().split(/\s+/);
+  let i = 0;
+  while (i < wa.length && i < wb.length && wa[i] === wb[i]) i++;
+  // Return the prefix using original casing from `a`
+  return a.trim().split(/\s+/).slice(0, i).join(' ');
+}
+
+// ─── Smart 2-Pass Grouping Engine ────────────────────────────────────────────
+// Pass 1A: scan all products per category to build a shared-prefix lookup table.
+// Pass 1B: parse each product → { mainName, subtypeName } using:
+//   1. Explicit named rules (MCB, Bearings, Hoses, etc.)
+//   2. Structural separators ( - , _)
+//   3. Trailing numeric-unit size suffix
+//   4. General shared-prefix engine (catches JOLLY WORM DRIVE, PAKAD, etc.)
+// Pass 2:  group by (category + mainName) → array of card groups.
+function buildGroupedProducts(list) {
+  if (!list || !Array.isArray(list) || list.length === 0) return [];
+
+  // ── Pass 1A: build prefix lookup map ────────────────────────────────────────
+  const byCategory = {};
+  list.forEach(p => {
+    if (!p || !p.name) return;
+    const cat = p.category || 'Other';
+    if (!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push(p.name.trim());
+  });
+
+  // prefixMap: "CATEGORY|||fullName" → { mainName, subtypeName }
+  const prefixMap = {};
+
+  Object.entries(byCategory).forEach(([cat, names]) => {
+    // Count how many products share each common prefix
+    const prefixCount = {};
+    for (let i = 0; i < names.length; i++) {
+      for (let j = i + 1; j < names.length; j++) {
+        const pfx = commonWordPrefix(names[i], names[j]);
+        if (
+          pfx.length >= 3 &&
+          pfx.toUpperCase() !== names[i].toUpperCase() &&
+          pfx.toUpperCase() !== names[j].toUpperCase()
+        ) {
+          prefixCount[pfx.toUpperCase()] = (prefixCount[pfx.toUpperCase()] || 0) + 1;
+        }
+      }
+    }
+
+    names.forEach(name => {
+      const mapKey = `${cat}|||${name}`;
+      const nameUpper = name.toUpperCase();
+      // Find all prefixes that are a strict prefix of this name
+      const candidates = Object.keys(prefixCount).filter(pfxUpper =>
+        nameUpper.startsWith(pfxUpper) &&
+        nameUpper.length > pfxUpper.length &&
+        (nameUpper[pfxUpper.length] === ' ' || nameUpper[pfxUpper.length] === '_') &&
+        prefixCount[pfxUpper] >= 1
+      );
+      if (candidates.length > 0) {
+        // Use the longest matching prefix
+        const bestPfxUpper = candidates.reduce((a, b) => a.length >= b.length ? a : b);
+        // Recover original-case mainName from the name string
+        const mainName = name.substring(0, bestPfxUpper.length).trim();
+        const suffix = name.substring(bestPfxUpper.length).trim().replace(/^[-_\s]+/, '');
+        prefixMap[mapKey] = { mainName, subtypeName: suffix || 'Standard' };
+      }
+    });
+  });
+
+  // ── Pass 1B: classify every product ─────────────────────────────────────────
+  const parsed = list.map(p => {
+    if (!p || !p.name) return null;
+    const name = p.name.trim();
+    const U = name.toUpperCase();
+    let mainName = name;
+    let subtypeName = 'Standard';
+
+    // ── 1. MCB ────────────────────────────────────────────────────────────────
+    if (U.includes('MCB')) {
+      let v = name;
+      if (U.includes('SINGLE')) v = 'Single Pole MCB';
+      else if (U.includes('DUBLE') || U.includes('DOUBLE')) v = 'Double Pole MCB';
+      else if (U.includes('THREE') || U.includes('TRIPLE')) v = 'Three Pole MCB';
+      else if (U.includes('FOUR')) v = 'Four Pole MCB';
+      mainName = 'MCB'; subtypeName = v;
+    }
+    // ── 2. Switches & Indicators ──────────────────────────────────────────────
+    else if (U === 'INDICATOR' || U === 'PUSH BUTTON' || U.includes('EMERGENCY STOP') || U.includes('SELECTOR SWITCH')) {
+      let v = name;
+      if (U === 'INDICATOR') v = 'Indicator';
+      else if (U === 'PUSH BUTTON') v = 'Push Button';
+      else if (U.includes('EMERGENCY STOP')) v = 'Emergency Stop Button';
+      else if (U.includes('SELECTOR SWITCH')) v = 'Selector Switch';
+      mainName = 'Switches & Indicators'; subtypeName = v;
+    }
+    // ── 3. Relay Series ───────────────────────────────────────────────────────
+    else if (U.includes('AM 91') || U === 'VAF' || U.includes('P2P') || U.includes('AM 93') || U.includes('MPR 932')) {
+      let v = name;
+      if (U.includes('AM 91')) v = 'AM 91 / VM 91';
+      else if (U === 'VAF') v = 'VAF';
+      else if (U.includes('P2P')) v = 'P2P 912 / 712 / 412';
+      else if (U.includes('AM 93')) v = 'AM 93 / VM 93';
+      else if (U.includes('MPR 932')) v = 'MPR 932';
+      mainName = 'Relay Series'; subtypeName = v;
+    }
+    // ── 4. Protection Devices ─────────────────────────────────────────────────
+    else if ((U.includes('ELCB') && U.includes('POL')) || (U.includes('AVM') && U.includes('POL'))) {
+      mainName = 'Protection Devices';
+      subtypeName = U.includes('ELCB') ? 'ELCB 2 POL' : 'AVM 2 POL';
+    }
+    // ── 5. Spiral Sleeve ──────────────────────────────────────────────────────
+    else if (U.includes('SPYRAL') || U.includes('SPIRAL')) {
+      const m = name.match(/(\d+mm)/i);
+      mainName = 'Spiral'; subtypeName = m ? m[1] : 'Standard';
+    }
+    // ── 6. Others (Electrical) ────────────────────────────────────────────────
+    else if (U.includes('LIMIT SWITCH') || U.includes('PANEL LOCK') || U.includes('CONNECTOR LOCK')) {
+      let v = name;
+      if (U.includes('LIMIT SWITCH')) v = 'Limit Switch 8108';
+      else if (U.includes('PANEL LOCK')) v = 'Panel Lock';
+      else if (U.includes('CONNECTOR LOCK')) v = 'Connector Lock';
+      mainName = 'Others'; subtypeName = v;
+    }
+    // ── 7. Spherical Bearing ──────────────────────────────────────────────────
+    else if (U.startsWith('BEARING 22211') || U.startsWith('BEARING 22217')) {
+      let v = '22211';
+      if (U.includes('22211 K') || U.includes('22211K')) v = '22211 K';
+      else if (U.includes('22211')) v = '22211';
+      else if (U.includes('22217 K') || U.includes('22217K')) v = '22217 K';
+      else if (U.includes('22217')) v = '22217';
+      mainName = 'Spherical Bearing'; subtypeName = v;
+    }
+    // ── 8. Bearing Series 6000 / 6200 / 6300 ─────────────────────────────────
+    else if (U.startsWith('BEARING ')) {
+      const m = name.match(/^BEARING\s+(\d+)\s*[_\s-]*\s*(.*)/i);
+      if (m) {
+        const num = m[1];
+        const suffix = m[2].trim().replace(/^_/, '').replace(/_/g, ' ');
+        const series = num.substring(0, 2) + '00';
+        mainName = `Bearing Series ${series}`;
+        subtypeName = `${num}${suffix ? ' ' + suffix : ''}`.trim();
+      }
+    }
+    // ── 9. PVC Braided Hose ───────────────────────────────────────────────────
+    else if (U.includes('PVC BRADIED') || U.includes('PVC BRAIDED')) {
+      const m = name.match(/(\d+MM|\d+\s*MM)/i);
+      mainName = 'PVC Braided Hose'; subtypeName = m ? m[1].toUpperCase() : 'Standard';
+    }
+    // ── 10. Pneumatic Rubber Hose ─────────────────────────────────────────────
+    else if (U.includes('PNEUMATIC') && U.includes('RUBBER') && U.includes('HOSE')) {
+      const m = name.match(/(\d+\s*MM|\d+MM)/i);
+      mainName = 'Pneumatic Rubber Hose'; subtypeName = m ? m[1].toUpperCase() : 'Standard';
+    }
+    // ── 11. Samson PVC Braided Hose ───────────────────────────────────────────
+    else if (U.includes('SAMSON PVC') && U.includes('HOSE')) {
+      const size = name.replace(/SAMSON PVC BR[AI]+DIED HOSE/gi, '').trim().replace(/^[-_\s]+/, '').replace(/_/g, ' ');
+      mainName = 'Samson PVC Braided Hose'; subtypeName = size || 'Standard';
+    }
+    // ── 12. Samson Thermo Acty ────────────────────────────────────────────────
+    else if (U.includes('SAMSON THERMO ACTY')) {
+      let v = name.replace(/SAMSON THERMO ACTY/gi, '').trim().replace(/^[-_\s]+/, '');
+      if (U.includes('BLACK')) v = U.includes('6MM') ? 'Black 6MM' : 'Black 8MM';
+      else if (U.includes('RED')) v = 'Red 8MM';
+      else if (U.includes('BLUE')) v = 'Blue 8MM';
+      mainName = 'Samson Thermo Acty'; subtypeName = v;
+    }
+    // ── 13. Regulators ────────────────────────────────────────────────────────
+    else if (U.includes('REGULATOR') && (U.includes('CO2') || U.includes('OXYGEN') || U.includes('NITROGEN') || U.includes('ACETYLENE') || U.includes('ARGON'))) {
+      let v = 'Regulator';
+      if (U.includes('CO2')) v = 'CO2';
+      else if (U.includes('OXYGEN')) v = 'Oxygen';
+      else if (U.includes('NITROGEN')) v = 'Nitrogen';
+      else if (U.includes('ACETYLENE')) v = 'Acetylene';
+      else if (U.includes('ARGON')) v = 'Argon';
+      mainName = 'Regulators'; subtypeName = `${v} Regulator`;
+    }
+    // ── 14. Ganga R6 Rubber Hose ──────────────────────────────────────────────
+    else if (U.includes('GANGA R6 RUBBER HOSE')) {
+      const m = name.match(/(\d+MM|\d+\s*MM)/i);
+      mainName = 'Ganga R6 Rubber Hose'; subtypeName = m ? m[1].toUpperCase() : 'Standard';
+    }
+    // ── 15. Samson High Pressure Hose ─────────────────────────────────────────
+    else if (U.includes('SAMSON HIGH PRESSURE HOSE')) {
+      const m = name.match(/(\d+MM|\d+\s*MM)/i);
+      mainName = 'Samson High Pressure Hose'; subtypeName = m ? m[1].toUpperCase() : '8MM';
+    }
+    // ── 16. LPG Rubber Hose ───────────────────────────────────────────────────
+    else if (U.includes('LPG RUBBER HOSE')) {
+      const m = name.match(/(\d+MM|\d+\s*MM)/i);
+      mainName = 'LPG Rubber Hose'; subtypeName = m ? m[1].toUpperCase() : '8MM';
+    }
+    // ── 17. Jolly Worm Drive Hose Clips ──────────────────────────────────────
+    else if (U.includes('WORM DRIVE HOSE CLIPS')) {
+      const suffix = name.replace(/JOLLY WORM DRIVE HOSE CLIPS/gi, '').replace(/WORM DRIVE HOSE CLIPS/gi, '').trim().replace(/^[-_\s]+/, '');
+      mainName = 'Jolly Worm Drive Hose Clips'; subtypeName = suffix || 'Standard';
+    }
+    // ── 18. Flap Disc / Mop Wheel / Cut Off Wheel / DC Wheel ─────────────────
+    else if (U.includes('FLAP DISC')) {
+      mainName = 'Flap Disc'; subtypeName = name.replace(/FLAP DISC/gi, '').trim() || 'Standard';
+    }
+    else if (U.includes('MOP WHEEL')) {
+      mainName = 'Mop Wheel'; subtypeName = name.replace(/MOP WHEEL/gi, '').trim() || 'Standard';
+    }
+    else if (U.includes('CUT OFF WHEEL') || U.includes('CUT OF WHEEL')) {
+      mainName = 'Cut Off Wheel'; subtypeName = name.replace(/CUT O[F]+\s*WHEEL/gi, '').trim() || 'Standard';
+    }
+    else if (U.includes('DC WHEEL')) {
+      mainName = 'DC Wheel'; subtypeName = name.replace(/DC WHEEL/gi, '').trim() || 'Standard';
+    }
+
+    // ── Structural separator: " - " ───────────────────────────────────────────
+    else if (name.includes(' - ')) {
+      const parts = name.split(' - ');
+      mainName = parts[0].trim();
+      subtypeName = parts.slice(1).join(' - ').trim();
+    }
+    // ── Structural separator: "_" ─────────────────────────────────────────────
+    else if (name.includes('_')) {
+      const parts = name.split('_');
+      mainName = parts[0].trim();
+      subtypeName = parts.slice(1).join('_').replace(/_/g, ' ').trim();
+    }
+    // ── UCP / UCF / UCFL / UCT Bearing Housing ───────────────────────────────
+    else if (/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i.test(name)) {
+      const m = name.match(/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i);
+      mainName = `${m[1].toUpperCase()} Bearing Housing`;
+      subtypeName = m[2].trim();
+    }
+    // ── General trailing numeric-unit size ────────────────────────────────────
+    else {
+      const sizeRegex = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)\s*(?:MM|KG|MTR|METER|INCH|LTR|LITER|Nos|Pcs|Amp|A|HP|V|W|")(?:\s+.*)?)$/i;
+      const dimRegex  = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)"?\s*X\s*(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+).*)$/i;
+
+      let sizeMatched = false;
+      let m = name.match(dimRegex);
+      if (m) {
+        const suffix = m[1];
+        const base = name.slice(0, name.lastIndexOf(suffix)).trim();
+        if (base.length > 2) { mainName = base; subtypeName = suffix; sizeMatched = true; }
+      }
+      if (!sizeMatched) {
+        m = name.match(sizeRegex);
+        if (m) {
+          const suffix = m[1];
+          const base = name.slice(0, name.lastIndexOf(suffix)).trim();
+          if (base.length > 2) { mainName = base; subtypeName = suffix; sizeMatched = true; }
+        }
+      }
+      // ── General shared-prefix engine (last resort) ────────────────────────
+      if (!sizeMatched) {
+        const prefixKey = `${p.category}|||${name}`;
+        if (prefixMap[prefixKey]) {
+          mainName = prefixMap[prefixKey].mainName;
+          subtypeName = prefixMap[prefixKey].subtypeName;
+        }
+      }
+    }
+
+    return { ...p, _mainName: mainName, _subtypeName: subtypeName || 'Standard' };
+  }).filter(Boolean);
+
+  // ── Pass 2: group into card objects ─────────────────────────────────────────
+  const groups = {};
+  parsed.forEach(p => {
+    const key = `${p.category}_${p._mainName}`;
+    if (!groups[key]) {
+      groups[key] = { name: p._mainName, category: p.category, subtypes: [] };
+    }
+    groups[key].subtypes.push({ ...p, subtypeName: p._subtypeName });
+  });
+
+  return Object.values(groups);
+}
+
 export default function SalesmanInventory() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -138,11 +413,10 @@ export default function SalesmanInventory() {
 
   useEffect(() => {
     setLoading(true);
-
     api
       .get('/products', {
         params: {
-          limit: 1000, // Load all 411 products so searching/filtering works perfectly
+          limit: 1000,
           search,
           category: categoryFilter,
           status: 'active',
@@ -153,283 +427,14 @@ export default function SalesmanInventory() {
       .finally(() => setLoading(false));
   }, [search, categoryFilter]);
 
-  // Premium Grouping Function to consolidate subtypes (MCBs, bearings, flap discs, hoses, etc.)
-  const groupProducts = (list) => {
-    if (!list || !Array.isArray(list)) return [];
-    const groups = {};
-
-    list.forEach(p => {
-      if (!p || !p.name) return;
-      const name = p.name.trim();
-      const upperName = name.toUpperCase();
-      let mainName = name;
-      let subtypeName = 'Standard';
-
-      // --- A. EXPLICIT CUSTOM MAPPINGS FROM USER'S REQUEST (RUN FIRST) ---
-      
-      // 1. MCB (Electrical)
-      if (upperName.includes('MCB')) {
-        let variant = 'Standard';
-        if (upperName.includes('SINGLE')) variant = 'Single Pole MCB';
-        else if (upperName.includes('DUBLE') || upperName.includes('DOUBLE')) variant = 'Double Pole MCB';
-        else if (upperName.includes('THREE') || upperName.includes('TRIPLE')) variant = 'Three Pole MCB';
-        else if (upperName.includes('FOUR')) variant = 'Four Pole MCB';
-        else variant = name;
-
-        mainName = 'MCB';
-        subtypeName = variant;
-      }
-      // 2. Switches & Indicators (Electrical)
-      else if (upperName === 'INDICATOR' || upperName === 'PUSH BUTTON' || upperName.includes('EMERGENCY STOP') || upperName.includes('SELECTOR SWITCH')) {
-        let variant = name;
-        if (upperName === 'INDICATOR') variant = 'Indicator';
-        else if (upperName === 'PUSH BUTTON') variant = 'Push Button';
-        else if (upperName.includes('EMERGENCY STOP')) variant = 'Emergency Stop Button';
-        else if (upperName.includes('SELECTOR SWITCH')) variant = 'Selector Switch';
-
-        mainName = 'Switches & Indicators';
-        subtypeName = variant;
-      }
-      // 3. Relay Series (Electrical)
-      else if (upperName.includes('AM 91') || upperName === 'VAF' || upperName.includes('P2P') || upperName.includes('AM 93') || upperName.includes('MPR 932')) {
-        let variant = name;
-        if (upperName.includes('AM 91')) variant = 'AM 91 / VM 91';
-        else if (upperName === 'VAF') variant = 'VAF';
-        else if (upperName.includes('P2P')) variant = 'P2P 912 / 712 / 412';
-        else if (upperName.includes('AM 93')) variant = 'AM 93 / VM 93';
-        else if (upperName.includes('MPR 932')) variant = 'MPR 932';
-
-        mainName = 'Relay Series';
-        subtypeName = variant;
-      }
-      // 4. Protection Devices (Electrical)
-      else if (upperName.includes('ELCB - 2 POL') || upperName.includes('ELCB 2 POL') || upperName.includes('AVM - 2 POL') || upperName.includes('AVM 2 POL')) {
-        let variant = name;
-        if (upperName.includes('ELCB')) variant = 'ELCB 2 POL';
-        else if (upperName.includes('AVM')) variant = 'AVM 2 POL';
-
-        mainName = 'Protection Devices';
-        subtypeName = variant;
-      }
-      // 5. Spiral Sleeve (Electrical)
-      else if (upperName.includes('SPYRAL') || upperName.includes('SPIRAL')) {
-        const match = name.match(/(\d+mm)/i);
-        const size = match ? match[1] : 'Standard';
-        mainName = 'Spiral';
-        subtypeName = size;
-      }
-      // 6. Others (Electrical)
-      else if (upperName.includes('LIMIT SWITCH') || upperName.includes('PANEL LOCK') || upperName.includes('CONNECTOR LOCK')) {
-        let variant = name;
-        if (upperName.includes('LIMIT SWITCH')) variant = 'Limit Switch 8108';
-        else if (upperName.includes('PANEL LOCK')) variant = 'Panel Lock';
-        else if (upperName.includes('CONNECTOR LOCK')) variant = 'Connector Lock';
-
-        mainName = 'Others';
-        subtypeName = variant;
-      }
-      // 7. Spherical Bearing (Bearing)
-      else if (upperName.startsWith('BEARING 22211') || upperName.startsWith('BEARING 22217')) {
-        let variant = '22211';
-        if (upperName.includes('22211 K') || upperName.includes('22211K')) variant = '22211 K';
-        else if (upperName.includes('22211')) variant = '22211';
-        else if (upperName.includes('22217 K') || upperName.includes('22217K')) variant = '22217 K';
-        else if (upperName.includes('22217')) variant = '22217';
-
-        mainName = 'Spherical Bearing';
-        subtypeName = variant;
-      }
-      // 8. Explicit Bearing Series (6000, 6200, 6300)
-      else if (upperName.startsWith('BEARING ')) {
-        const match = name.match(/^BEARING\s+(\d+)\s*[_\s-]*\s*(.*)/i);
-        if (match) {
-          const num = match[1];
-          let suffix = match[2].trim();
-          const series = num.substring(0, 2) + '00';
-          
-          if (suffix.startsWith('_')) suffix = suffix.substring(1);
-          suffix = suffix.replace(/_/g, ' ');
-
-          mainName = `Bearing Series ${series}`;
-          subtypeName = `${num} ${suffix || 'Standard'}`;
-        }
-      }
-      // 9. PVC Braided Hose (Hydraulic)
-      else if (upperName.includes('PVC BRADIED') || upperName.includes('PVC BRAIDED')) {
-        const match = name.match(/(\d+MM|\d+\s*MM)/i);
-        const size = match ? match[1].toUpperCase() : 'Standard';
-        mainName = 'PVC Braided Hose';
-        subtypeName = size;
-      }
-      // 10. Pneumatic Rubber Hose (Hydraulic)
-      else if (upperName.includes('PNEUMATIC RUBBER HOSE') || (upperName.includes('PNEUMATIC') && upperName.includes('RUBBER') && upperName.includes('HOSE'))) {
-        const match = name.match(/(\d+\s*MM|\d+MM)/i);
-        const size = match ? match[1].toUpperCase() : 'Standard';
-        mainName = 'Pneumatic Rubber Hose';
-        subtypeName = size;
-      }
-      // 11. Samson PVC Braided Hose (Hydraulic)
-      else if (upperName.includes('SAMSON PVC BRADIED HOSE') || upperName.includes('SAMSON PVC BRAIDED HOSE')) {
-        let size = name.replace(/SAMSON PVC BRADIED HOSE/gi, '').replace(/SAMSON PVC BRAIDED HOSE/gi, '').trim();
-        if (size.startsWith('_')) size = size.substring(1);
-        size = size.replace(/_/g, ' ');
-        mainName = 'Samson PVC Braided Hose';
-        subtypeName = size || 'Standard';
-      }
-      // 12. Samson Thermo Acty (Hydraulic)
-      else if (upperName.includes('SAMSON THERMO ACTY')) {
-        let variant = name.replace(/SAMSON THERMO ACTY/gi, '').trim();
-        if (variant.startsWith('_')) variant = variant.substring(1);
-        if (variant.toUpperCase().includes('BLACK')) {
-          variant = variant.toUpperCase().includes('6MM') ? 'Black 6MM' : 'Black 8MM';
-        } else if (variant.toUpperCase().includes('RED')) {
-          variant = 'Red 8MM';
-        } else if (variant.toUpperCase().includes('BLUE')) {
-          variant = 'Blue 8MM';
-        }
-        mainName = 'Samson Thermo Acty';
-        subtypeName = variant;
-      }
-      // 13. Regulators (Hydraulic)
-      else if (upperName.includes('REGULATOR') && (upperName.includes('CO2') || upperName.includes('OXYGEN') || upperName.includes('NITROGEN') || upperName.includes('ACETYLENE') || upperName.includes('ARGON'))) {
-        let variant = 'CO2 Regulator';
-        if (upperName.includes('CO2')) variant = 'CO2 Regulator';
-        else if (upperName.includes('OXYGEN')) variant = 'Oxygen Regulator';
-        else if (upperName.includes('NITROGEN')) variant = 'Nitrogen Regulator';
-        else if (upperName.includes('ACETYLENE')) variant = 'Acetylene Regulator';
-        else if (upperName.includes('ARGON')) variant = 'Argon Regulator';
-
-        mainName = 'Regulators';
-        subtypeName = variant;
-      }
-      // 14. Ganga R6 Rubber Hose (Hydraulic)
-      else if (upperName.includes('GANGA R6 RUBBER HOSE')) {
-        const match = name.match(/(\d+MM|\d+\s*MM)/i);
-        const size = match ? match[1].toUpperCase() : 'Standard';
-        mainName = 'Ganga R6 Rubber Hose';
-        subtypeName = size;
-      }
-      // 15. Samson High Pressure Hose (Hydraulic)
-      else if (upperName.includes('SAMSON HIGH PRESSURE HOSE')) {
-        const match = name.match(/(\d+MM|\d+\s*MM)/i);
-        const size = match ? match[1].toUpperCase() : '8MM';
-        mainName = 'Samson High Pressure Hose';
-        subtypeName = size;
-      }
-      // 16. LPG Rubber Hose (Hydraulic)
-      else if (upperName.includes('LPG RUBBER HOSE')) {
-        const match = name.match(/(\d+MM|\d+\s*MM)/i);
-        const size = match ? match[1].toUpperCase() : '8MM';
-        mainName = 'LPG Rubber Hose';
-        subtypeName = size;
-      }
-
-      // --- B. STRUCTURAL AND SMART FALLBACK RULES ---
-      else if (name.includes(' - ')) {
-        const parts = name.split(' - ');
-        mainName = parts[0].trim();
-        subtypeName = parts.slice(1).join(' - ').trim();
-      }
-      else if (name.includes('_')) {
-        const parts = name.split('_');
-        mainName = parts[0].trim();
-        subtypeName = parts.slice(1).join('_').trim();
-      }
-      else if (/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i.test(name)) {
-        const housingMatch = name.match(/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i);
-        const type = housingMatch[1].toUpperCase();
-        const size = housingMatch[2].trim();
-        mainName = `${type} Bearing Housing`;
-        subtypeName = size;
-      }
-      else {
-        const sizeRegex = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)\s*(?:MM|KG|MTR|METER|INCH|LTR|LITER|Nos|Pcs|Amp|A|HP|V|W|")(?:\s+.*)?)$/i;
-        const dimRegex = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)"?\s*X\s*(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+).*)$/i;
-
-        let sizeMatched = false;
-
-        let match = name.match(dimRegex);
-        if (match) {
-          const matchedSuffix = match[1];
-          const baseName = name.slice(0, name.lastIndexOf(matchedSuffix)).trim();
-          if (baseName.length > 2) {
-            mainName = baseName;
-            subtypeName = matchedSuffix;
-            sizeMatched = true;
-          }
-        }
-
-        if (!sizeMatched) {
-          match = name.match(sizeRegex);
-          if (match) {
-            const matchedSuffix = match[1];
-            const baseName = name.slice(0, name.lastIndexOf(matchedSuffix)).trim();
-            if (baseName.length > 2) {
-              mainName = baseName;
-              subtypeName = matchedSuffix;
-              sizeMatched = true;
-            }
-          }
-        }
-
-        if (!sizeMatched) {
-          if (upperName.includes('FLAP DISC')) {
-            const suffix = name.replace(/FLAP DISC/gi, '').trim();
-            mainName = 'Flap Disc';
-            subtypeName = suffix || 'Standard';
-          } else if (upperName.includes('MOP WHEEL')) {
-            const suffix = name.replace(/MOP WHEEL/gi, '').trim();
-            mainName = 'Mop Wheel';
-            subtypeName = suffix || 'Standard';
-          } else if (upperName.includes('CUT OFF WHEEL') || upperName.includes('CUT OF WHEEL')) {
-            const suffix = name.replace(/CUT OFF WHEEL/gi, '').replace(/CUT OF WHEEL/gi, '').trim();
-            mainName = 'Cut Off Wheel';
-            subtypeName = suffix || 'Standard';
-          } else if (upperName.includes('DC WHEEL')) {
-            const suffix = name.replace(/DC WHEEL/gi, '').trim();
-            mainName = 'DC Wheel';
-            subtypeName = suffix || 'Standard';
-          }
-        }
-      }
-
-      const key = `${p.category}_${mainName}`;
-      if (!groups[key]) {
-        groups[key] = {
-          name: mainName,
-          category: p.category,
-          image: p.image,
-          subtypes: []
-        };
-      }
-      
-      // Update image if group image is null but product has one
-      if (!groups[key].image && p.image) {
-        groups[key].image = p.image;
-      }
-
-      groups[key].subtypes.push({
-        ...p,
-        subtypeName: subtypeName || 'Standard'
-      });
-    });
-
-    return Object.values(groups);
-  };
-
-  const groupedProducts = groupProducts(products);
+  const groupedProducts = buildGroupedProducts(products);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Product Catalog
-        </h1>
-
-        <p className="text-gray-500 mt-1">
-          View available products and stock levels
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">Product Catalog</h1>
+        <p className="text-gray-500 mt-1">View available products and stock levels</p>
       </div>
 
       {/* Filters */}
@@ -440,7 +445,6 @@ export default function SalesmanInventory() {
           onChange={setSearch}
           className="flex-1 min-w-48"
         />
-
         <select
           className="border rounded-xl px-3 py-2 w-48 text-sm font-semibold bg-white cursor-pointer select-field"
           value={categoryFilter}
@@ -448,9 +452,7 @@ export default function SalesmanInventory() {
         >
           <option value="">All Categories</option>
           {PRODUCT_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
+            <option key={c} value={c}>{c}</option>
           ))}
         </select>
       </div>
@@ -458,20 +460,15 @@ export default function SalesmanInventory() {
       {/* Product Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {loading ? (
-          Array(8)
-            .fill(0)
-            .map((_, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse border"
-              >
-                <div className="h-52 bg-gray-50" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-gray-100 rounded" />
-                  <div className="h-3 bg-gray-100 rounded w-1/2" />
-                </div>
+          Array(8).fill(0).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse border">
+              <div className="h-52 bg-gray-50" />
+              <div className="p-4 space-y-3">
+                <div className="h-4 bg-gray-100 rounded" />
+                <div className="h-3 bg-gray-100 rounded w-1/2" />
               </div>
-            ))
+            </div>
+          ))
         ) : groupedProducts.length === 0 ? (
           <div className="col-span-full text-center py-20 text-gray-400 bg-white rounded-2xl border">
             <Package size={50} className="mx-auto mb-3 opacity-30" />

@@ -151,3 +151,4 @@
 2026-05-13 13:07:29 [info]: 🚀 Vardhman Family ERP Server running on port 5000
 2026-05-13 13:07:29 [info]: 📌 Environment: development
 2026-05-13 13:07:29 [info]: 🌐 API Base: http://0.0.0.0:5000/api
+2026-05-27 08:49:09 [error]: Error creating indexes:
