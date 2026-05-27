@@ -25,11 +25,15 @@ const getProducts = async (req, res) => {
     const query = {};
 
     if (search) {
+      let cleanSearch = search.trim();
+      // Handle common spelling variations (e.g., "pakkad" -> "pakad")
+      cleanSearch = cleanSearch.replace(/pakk+ad+/gi, 'pakad');
+
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { productId: { $regex: search, $options: 'i' } },
-        { barcode: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
+        { name: { $regex: cleanSearch, $options: 'i' } },
+        { productId: { $regex: cleanSearch, $options: 'i' } },
+        { barcode: { $regex: cleanSearch, $options: 'i' } },
+        { category: { $regex: cleanSearch, $options: 'i' } },
       ];
     }
     if (category) query.category = category;
