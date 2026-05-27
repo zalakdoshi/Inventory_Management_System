@@ -153,52 +153,102 @@ export default function SalesmanInventory() {
     const groups = {};
 
     list.forEach(p => {
-      let mainName = p.name;
+      const name = p.name.trim();
+      const upperName = name.toUpperCase();
+      let mainName = name;
       let subtypeName = 'Standard';
 
-      const upperName = p.name.toUpperCase();
-
-      // Grouping rules:
-      if (p.name.includes(' - ')) {
-        // Electrical items and other pre-formatted items (e.g. F.T.I - 0.5mm)
-        const parts = p.name.split(' - ');
+      // 1. Explicit separator " - " (typically from Electrical sheet nesting)
+      if (name.includes(' - ')) {
+        const parts = name.split(' - ');
         mainName = parts[0].trim();
         subtypeName = parts.slice(1).join(' - ').trim();
-      } else if (upperName.includes('FLAP DISC')) {
-        mainName = 'Flap Disc';
-        subtypeName = p.name.replace(/FLAP DISC/gi, '').trim();
-      } else if (upperName.includes('MOP WHEEL')) {
-        mainName = 'Mop Wheel';
-        subtypeName = p.name.replace(/MOP WHEEL/gi, '').trim();
-      } else if (upperName.includes('CUT OFF WHEEL') || upperName.includes('CUT OF WHEEL')) {
-        mainName = 'Cut Off Wheel';
-        subtypeName = p.name.replace(/CUT OFF WHEEL/gi, '').replace(/CUT OF WHEEL/gi, '').trim();
-      } else if (upperName.includes('DC WHEEL')) {
-        mainName = 'DC Wheel';
-        subtypeName = p.name.replace(/DC WHEEL/gi, '').trim();
-      } else if (upperName.startsWith('UCP ') && upperName.includes('HOUSING')) {
-        mainName = 'UCP Bearing Housing';
-        subtypeName = p.name.replace(/UCP/gi, '').replace(/BRG HOUSING/gi, '').trim();
-      } else if (upperName.startsWith('UCP ') && upperName.includes('SMTB')) {
-        mainName = 'UCP SMTB';
-        subtypeName = p.name.replace(/UCP/gi, '').replace(/SMTB/gi, '').trim();
-      } else if (upperName.startsWith('UCF ') && upperName.includes('HOUSING')) {
-        mainName = 'UCF Bearing Housing';
-        subtypeName = p.name.replace(/UCF/gi, '').replace(/BRG HOUSING/gi, '').trim();
-      } else if (upperName.startsWith('UCF ') && upperName.includes('SMTB')) {
-        mainName = 'UCF SMTB';
-        subtypeName = p.name.replace(/UCF/gi, '').replace(/SMTB/gi, '').trim();
-      } else if (upperName.startsWith('UCFL ') && upperName.includes('SMTB')) {
-        mainName = 'UCFL SMTB';
-        subtypeName = p.name.replace(/UCFL/gi, '').replace(/SMTB/gi, '').trim();
-      } else if (upperName.startsWith('UCT ') && upperName.includes('SMTB')) {
-        mainName = 'UCT SMTB';
-        subtypeName = p.name.replace(/UCT/gi, '').replace(/SMTB/gi, '').trim();
-      } else if (upperName.startsWith('BEARING ')) {
-        const match = p.name.match(/^BEARING\s+(\d+)\s*(.*)/i);
+      }
+      // 2. Explicit separator "_" (typically from some sizes, e.g. ABC FIRE EXTINGUISHERS_1KG, REALFLEX PVC BRADIED HOSE_6MM)
+      else if (name.includes('_')) {
+        const parts = name.split('_');
+        mainName = parts[0].trim();
+        subtypeName = parts.slice(1).join('_').trim();
+      }
+      // 3. Special rule for Bearings (e.g., BEARING 6000ZZ, BEARING 6001_2RS)
+      else if (upperName.startsWith('BEARING ')) {
+        const match = name.match(/^BEARING\s+(\d+)\s*[_\s-]*\s*(.*)/i);
         if (match) {
-          mainName = `Bearing ${match[1]}`;
-          subtypeName = match[2].trim() || 'Standard';
+          const num = match[1];
+          let suffix = match[2].trim();
+          mainName = `Bearing ${num}`;
+          subtypeName = suffix || 'Standard';
+        }
+      }
+      // 4. Special rule for UCP / UCF / UCFL / UCT bearing housings
+      else if (/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i.test(name)) {
+        const housingMatch = name.match(/^(UCP|UCF|UCFL|UCT)\s+(\d+(?:\s*(?:MM|INCH))?)\s*(.*)/i);
+        const type = housingMatch[1].toUpperCase();
+        const size = housingMatch[2].trim();
+        const rest = housingMatch[3].trim();
+        
+        let groupBase = `${type}`;
+        if (rest.toUpperCase().includes('SMTB')) {
+          groupBase = `${type} SMTB`;
+        } else if (rest.toUpperCase().includes('BRG HOUSING') || rest.toUpperCase().includes('HOUSING')) {
+          groupBase = `${type} Bearing Housing`;
+        } else {
+          groupBase = `${type} ${rest}`;
+        }
+        mainName = groupBase.trim();
+        subtypeName = size;
+      }
+      // 5. General rule for products with trailing size specifications.
+      else {
+        const sizeRegex = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)\s*(?:MM|KG|MTR|METER|INCH|LTR|LITER|Nos|Pcs|Amp|A|HP|V|W|")(?:\s+.*)?)$/i;
+        const dimRegex = /\s+((?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+)"?\s*X\s*(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\.\d+\/\d+).*)$/i;
+
+        let sizeMatched = false;
+
+        // Check dimRegex first as it's more specific
+        let match = name.match(dimRegex);
+        if (match) {
+          const matchedSuffix = match[1];
+          const baseName = name.slice(0, name.lastIndexOf(matchedSuffix)).trim();
+          if (baseName.length > 2) {
+            mainName = baseName;
+            subtypeName = matchedSuffix;
+            sizeMatched = true;
+          }
+        }
+
+        if (!sizeMatched) {
+          match = name.match(sizeRegex);
+          if (match) {
+            const matchedSuffix = match[1];
+            const baseName = name.slice(0, name.lastIndexOf(matchedSuffix)).trim();
+            if (baseName.length > 2) {
+              mainName = baseName;
+              subtypeName = matchedSuffix;
+              sizeMatched = true;
+            }
+          }
+        }
+
+        // 6. Custom overrides for consumables to ensure perfect clean groupings:
+        if (!sizeMatched) {
+          if (upperName.includes('FLAP DISC')) {
+            const suffix = name.replace(/FLAP DISC/gi, '').trim();
+            mainName = 'FLAP DISC';
+            subtypeName = suffix || 'Standard';
+          } else if (upperName.includes('MOP WHEEL')) {
+            const suffix = name.replace(/MOP WHEEL/gi, '').trim();
+            mainName = 'MOP WHEEL';
+            subtypeName = suffix || 'Standard';
+          } else if (upperName.includes('CUT OFF WHEEL') || upperName.includes('CUT OF WHEEL')) {
+            const suffix = name.replace(/CUT OFF WHEEL/gi, '').replace(/CUT OF WHEEL/gi, '').trim();
+            mainName = 'Cut Off Wheel';
+            subtypeName = suffix || 'Standard';
+          } else if (upperName.includes('DC WHEEL')) {
+            const suffix = name.replace(/DC WHEEL/gi, '').trim();
+            mainName = 'DC Wheel';
+            subtypeName = suffix || 'Standard';
+          }
         }
       }
 

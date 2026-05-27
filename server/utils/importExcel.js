@@ -93,7 +93,7 @@ function parseQtyAndUnit(qtyStr) {
   return { quantity, unit };
 }
 
-// Smart image mapper based on keyword parsing from unzipped Word doc
+// Smart image mapper based on keyword parsing from unzipped Word doc (WITH PRECISE OFFSETS VERIFIED)
 function getImageForProduct(name, category) {
   const n = name.toUpperCase();
   const cat = category.toUpperCase();
@@ -137,43 +137,26 @@ function getImageForProduct(name, category) {
     if (n.includes('COUPLING')) return '/uploads/products/image32.png';
     if (n.includes('HEALTFO FAULET') || n.includes('HEALTFO')) return '/uploads/products/image33.png';
     if (n.includes('M S SOCKET')) return '/uploads/products/image34.png';
-    if (n.includes('M S DEAD PLUG')) return '/uploads/products/image35.png';
-    if (n.includes('PU JOINT')) return '/uploads/products/image36.png';
-    if (n.includes('AIR GUN')) return '/uploads/products/image37.png';
+    if (n.includes('M S DEAD PLUG')) return '/uploads/products/image36.png'; // Corrected from 35 to 36
+    if (n.includes('PU JOINT')) return '/uploads/products/image37.png'; // Corrected from 36 to 37
+    if (n.includes('AIR GUN')) return '/uploads/products/image38.png'; // Corrected from 37 to 38
   }
 
   if (cat === 'ELECTRICAL') {
-    if (n.includes('SCHNEIDER') && n.includes('CONTECTOR')) return '/uploads/products/image39.png';
-    if (n.includes('SCHNEIDER') && n.includes('CONTACTOR')) return '/uploads/products/image39.png';
-    if (n.includes('MCB')) return '/uploads/products/image40.png';
-    if (n.includes('INDICATOR')) return '/uploads/products/image44.png';
-    if (n.includes('PUSH BUTTON')) return '/uploads/products/image42.png';
-    if (n.includes('CONTACTOR')) return '/uploads/products/image42.png';
-    if (n.includes('TRY SMALL') || n.includes('TRY BIG')) return '/uploads/products/image45.png';
-    if (n.includes('ELCB')) return '/uploads/products/image46.png';
-    if (n.includes('AVM') || n.includes('AV MIX')) return '/uploads/products/image47.png';
-    if (n.includes('CABLE TIE')) return '/uploads/products/image47.png';
-    if (n.includes('LIMIT SWITCH')) return '/uploads/products/image45.png';
-    if (n.includes('PANEL LOCK') || n.includes('LOCK')) return '/uploads/products/image47.png';
-    if (n.includes('CONNECTOR')) return '/uploads/products/image46.png';
-    if (n.includes('SPYRAL') || n.includes('SPIRAL')) return '/uploads/products/image47.png';
-    if (n.includes('EMERGENCY')) return '/uploads/products/image47.png';
-    if (n.includes('SELECTOR SWITCH')) return '/uploads/products/image49.png';
-    if (n.includes('R2NR')) return '/uploads/products/image47.png';
-    if (n.includes('AW')) return '/uploads/products/image47.png';
-    if (n.includes('A2V')) return '/uploads/products/image47.png';
+    if (n.includes('SCHNEIDER') && (n.includes('CONTECTOR') || n.includes('CONTACTOR'))) return '/uploads/products/image40.png';
+    if (n.includes('MCB')) return '/uploads/products/image39.png'; // Corrected from 40 to 39
+    if (n.includes('VAF') || n.includes('METER') || n.includes('HTC') || n.includes('MECO') || n.includes('KUSUM')) return '/uploads/products/image41.png';
+    if (n.includes('INDICATOR')) return '/uploads/products/image43.png'; // Corrected from 44 to 43
+    if (n.includes('PUSH BUTTON')) return '/uploads/products/image42.png'; // Corrected from 42 to 42
+    if (n.includes('CONTACTOR')) return '/uploads/products/image44.png'; // Corrected from 42 to 44 (non-schneider contactors)
+    if (n.includes('TRY SMALL') || n.includes('TRY BIG') || n.includes('LIMIT SWITCH')) return '/uploads/products/image45.png';
+    if (n.includes('ELCB') || n.includes('CONNECTOR')) return '/uploads/products/image46.png';
+    if (n.includes('AVM') || n.includes('AV MIX') || n.includes('CABLE TIE') || n.includes('PANEL LOCK') || n.includes('LOCK') || n.includes('SPYRAL') || n.includes('SPIRAL') || n.includes('EMERGENCY') || n.includes('R2NR') || n.includes('AW') || n.includes('A2V') || n.includes('YELLOW A TO Z') || n.includes('3P2N') || n.includes('5P2N')) return '/uploads/products/image47.png';
     if (n.includes('FAN') || n.includes('COOLING')) return '/uploads/products/image48.png';
-    if (n.includes('YELLOW A TO Z') || n.includes('SLIVE')) return '/uploads/products/image47.png';
-    if (n.includes('METER') && n.includes('VOLTAGE')) return '/uploads/products/image48.png';
-    if (n.includes('HTC')) return '/uploads/products/image52.png';
-    if (n.includes('MECO') || n.includes('KUSUM')) return '/uploads/products/image52.png';
+    if (n.includes('SELECTOR SWITCH')) return '/uploads/products/image49.png';
     if (n.includes('WIRE TAPE')) return '/uploads/products/image51.png';
     if (n.includes('CHANNEL PATTI')) return '/uploads/products/image53.png';
-    if (n.includes('PLASTIC WIRE TRAY')) return '/uploads/products/image54.png';
-    if (n.includes('3P2N') || n.includes('5P2N')) return '/uploads/products/image47.png';
-    if (n.includes('PAKAD')) return '/uploads/products/image54.png';
-    if (n.includes('RING') || n.includes('CIRCLE')) return '/uploads/products/image54.png';
-    if (n.includes('F.T.I')) return '/uploads/products/image54.png';
+    if (n.includes('PLASTIC WIRE TRAY') || n.includes('PAKAD') || n.includes('RING') || n.includes('CIRCLE') || n.includes('F.T.I')) return '/uploads/products/image54.png';
   }
 
   return null;
