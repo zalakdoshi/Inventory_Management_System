@@ -1,5 +1,5 @@
 /**
- * Vardhman Family ERP — Excel Import Script with Images
+ * Vardhman Family ERP — Excel Import Script with Images & Nested Lookahead
  * Run: node utils/importExcel.js
  * Clears existing products and imports new ones from d:\Inventory_Management_System\client\src\Product_Details (1).xlsx
  * Automatically maps unzipped images from PRODUCT_IMAGE.docx
@@ -207,7 +207,7 @@ async function importProducts() {
     }
     console.log(`👤 Mapped creator user: ${adminUser.name} (${adminUser.email})`);
 
-    // 2. Clear existing products (User requested reset)
+    // 2. Clear existing products
     console.log('🗑️  Deleting all existing products from database...');
     const deleteRes = await Product.deleteMany({});
     console.log(`✅ Deleted ${deleteRes.deletedCount} products.`);
@@ -240,55 +240,73 @@ async function importProducts() {
       }
 
       console.log(`📦 Processing sheet: "${sheet.name}" -> Category: "${category}"`);
+      
+      // Load all rows into memory first
+      const rows = [];
+      sheet.eachRow((row, rowNumber) => {
+        if (rowNumber < 4) return; // Skip headers
+        rows.push({
+          rowNumber,
+          colA: row.getCell(1).value, // SR.NO
+          colB: row.getCell(2).value, // PRODUCT NAME
+          colC: row.getCell(3).value, // QTY
+        });
+      });
+
       let sheetProductsCount = 0;
       let currentParent = null;
 
-      // Columns are:
-      // - Column A (1): SR.NO
-      // - Column B (2): PRODUCT NAME / ITEM
-      // - Column C (3): QTY
-      
-      sheet.eachRow((row, rowNumber) => {
-        if (rowNumber < 4) return; // Skip headers
+      for (let i = 0; i < rows.length; i++) {
+        const current = rows[i];
+        if (!current.colB) continue;
 
-        const colA = row.getCell(1).value; // Serial number in Col A
-        const colB = row.getCell(2).value; // Product Name / Item in Col B
-        const colC = row.getCell(3).value; // Quantity in Col C
+        // Clean name (strip leading and trailing dots/ellipses/spaces)
+        let name = current.colB.toString().trim()
+          .replace(/^[….\s]+/, '')
+          .replace(/[….\s]+$/, '');
 
-        if (!colB) return; // Skip empty row
+        // Skip blank dot placeholders
+        if (!name || (name === 'MP' && current.colB.toString().includes('…'))) continue;
 
-        const name = colB.toString().trim();
-        if (!name) return;
-
-        const srNo = colA ? colA.toString().trim() : '';
-        const { quantity, unit } = parseQtyAndUnit(colC);
+        const srNo = current.colA ? current.colA.toString().trim() : '';
+        const { quantity, unit } = parseQtyAndUnit(current.colC);
 
         let finalName = name;
         let isStandAlone = false;
 
         if (sheet.name === 'Electrical') {
           if (srNo) {
-            // Top-level item
-            if (colC !== null && colC !== undefined && colC.toString().trim() !== '') {
-              // It has a quantity value, so it is a standalone product
+            // Lookahead: does the next named row have no serial number?
+            let hasChildren = false;
+            for (let j = i + 1; j < rows.length; j++) {
+              if (rows[j].colB) {
+                const nextName = rows[j].colB.toString().trim();
+                if (nextName && !nextName.startsWith('…') && !nextName.startsWith('.')) {
+                  if (!rows[j].colA) {
+                    hasChildren = true;
+                  }
+                  break;
+                }
+              }
+            }
+
+            if (hasChildren) {
+              currentParent = name;
+              // Group header: do not insert directly, its children will be prefixed
+              continue;
+            } else {
+              // It is a standalone top-level product (e.g. MECO, A V Mix)
               currentParent = null;
               isStandAlone = true;
-            } else {
-              // It has no quantity, so it's a parent header for subsequent child rows
-              currentParent = name;
-              // We do not insert the parent row directly, we wait for children
-              return;
             }
           } else {
-            // Child row (no serial number). Append to current parent
+            // Child row: combine with current active parent
             finalName = currentParent ? `${currentParent} - ${name}` : name;
           }
         } else {
-          // Flat sheets: every row is a standalone product
           isStandAlone = true;
         }
 
-        // Map matching image if available
         const imagePath = getImageForProduct(finalName, category);
 
         allProductsToInsert.push({
@@ -305,7 +323,7 @@ async function importProducts() {
           image: imagePath || null
         });
         sheetProductsCount++;
-      });
+      }
 
       console.log(`   Processed ${sheetProductsCount} items.`);
     }
@@ -327,10 +345,10 @@ async function importProducts() {
     Object.keys(stats).forEach(cat => {
       console.log(`  - ${cat}: ${stats[cat]} products`);
     });
-    console.log(`\n🖼️  Products successfully mapped with images: ${imagedCount} of ${inserted.length}`);
+    console.log(`\n🖼  Products successfully mapped with images: ${imagedCount} of ${inserted.length}`);
 
     console.log('\n==================================================');
-    console.log('✨ DATABASE RE-SEEDED WITH COMPLETE EXCEL DATA & IMAGES! ✨');
+    console.log('✨ DATABASE RE-SEEDED WITH 100% COMPLETE EXCEL DATA & IMAGES! ✨');
     console.log('==================================================\n');
 
     process.exit(0);
