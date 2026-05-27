@@ -208,14 +208,24 @@ function buildGroupedProducts(list) {
     let mainName = name;
     let subtypeName = 'Standard';
 
-    // ── 1. MCB ────────────────────────────────────────────────────────────────
-    if (U.includes('MCB')) {
+    // ── 1. MCB (exclude MCB Accessories) ───────────────────────────────────────
+    if (U.includes('MCB') && !U.includes('ACCESSOR')) {
       let v = name;
       if (U.includes('SINGLE')) v = 'Single Pole MCB';
       else if (U.includes('DUBLE') || U.includes('DOUBLE')) v = 'Double Pole MCB';
       else if (U.includes('THREE') || U.includes('TRIPLE')) v = 'Three Pole MCB';
       else if (U.includes('FOUR')) v = 'Four Pole MCB';
       mainName = 'MCB'; subtypeName = v;
+    }
+    // ── 1b. MCB Accessories (16amp 3P2N, 32amp 5P2N etc.) ─────────────────────
+    else if (U.includes('MCB') && U.includes('ACCESSOR')) {
+      const suffix = name.replace(/MCB ACCESSORIES?/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'MCB Accessories'; subtypeName = suffix || 'Standard';
+    }
+    // ── 1c. Schneider Contactor ───────────────────────────────────────────────
+    else if (U.includes('SCHNEIDER')) {
+      const suffix = name.replace(/SCHNEIDER CONT[AE]CTOR?/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Schneider Contactor'; subtypeName = suffix || 'Standard';
     }
     // ── 2. Switches & Indicators ──────────────────────────────────────────────
     else if (U === 'INDICATOR' || U === 'PUSH BUTTON' || U.includes('EMERGENCY STOP') || U.includes('SELECTOR SWITCH')) {
@@ -241,10 +251,65 @@ function buildGroupedProducts(list) {
       mainName = 'Protection Devices';
       subtypeName = U.includes('ELCB') ? 'ELCB 2 POL' : 'AVM 2 POL';
     }
+    // ── 4b. Contactor (non-Schneider) ─────────────────────────────────────────
+    else if (U.includes('CONTACTOR') || U.includes('CONTECTOR')) {
+      const suffix = name.replace(/CONT[AE]CTOR?/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Contactor'; subtypeName = suffix || 'Standard';
+    }
     // ── 5. Spiral Sleeve ──────────────────────────────────────────────────────
     else if (U.includes('SPYRAL') || U.includes('SPIRAL')) {
       const m = name.match(/(\d+mm)/i);
       mainName = 'Spiral'; subtypeName = m ? m[1] : 'Standard';
+    }
+    // ── 5b. TRY SMALL ─────────────────────────────────────────────────────────
+    else if (U.startsWith('TRY SMALL')) {
+      const suffix = name.replace(/TRY SMALL/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'TRY SMALL'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5c. TRY BIG ───────────────────────────────────────────────────────────
+    else if (U.startsWith('TRY BIG')) {
+      const suffix = name.replace(/TRY BIG/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'TRY BIG'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5d. Cable Tie ─────────────────────────────────────────────────────────
+    else if (U.includes('CABLE TIE')) {
+      const suffix = name.replace(/CABLE TIE/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Cable Tie'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5e. Connector (standalone wiring connectors, not lock) ────────────────
+    else if (U.startsWith('CONNECTOR') && !U.includes('LOCK')) {
+      const suffix = name.replace(/CONNECTOR/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Connector'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5f. R2NR ──────────────────────────────────────────────────────────────
+    else if (U.startsWith('R2NR')) {
+      const suffix = name.replace(/R2NR/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'R2NR'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5g. AW (cable lug) ────────────────────────────────────────────────────
+    else if (/^AW\s*[-–]/.test(name) || U.startsWith('AW ')) {
+      const suffix = name.replace(/^AW/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'AW'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5h. A2V ───────────────────────────────────────────────────────────────
+    else if (U.startsWith('A2V')) {
+      const suffix = name.replace(/A2V/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'A2V'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5i. Fan ───────────────────────────────────────────────────────────────
+    else if (U.startsWith('FAN ') || U === 'FAN') {
+      const suffix = name.replace(/FAN/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Fan'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5j. Plastic Wire Tray ─────────────────────────────────────────────────
+    else if (U.includes('PLASTIC WIRE TRAY') || U.includes('WIRE TRAY')) {
+      const suffix = name.replace(/PLASTIC WIRE TRAY/gi, '').replace(/WIRE TRAY/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'Plastic Wire Tray'; subtypeName = suffix || 'Standard';
+    }
+    // ── 5k. F.T.I ─────────────────────────────────────────────────────────────
+    else if (U.startsWith('F.T.I')) {
+      const suffix = name.replace(/F\.T\.I/gi, '').trim().replace(/^[-\s]+/, '');
+      mainName = 'F.T.I'; subtypeName = suffix || 'Standard';
     }
     // ── 6. Others (Electrical) ────────────────────────────────────────────────
     else if (U.includes('LIMIT SWITCH') || U.includes('PANEL LOCK') || U.includes('CONNECTOR LOCK')) {
