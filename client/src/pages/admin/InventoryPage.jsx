@@ -14,17 +14,30 @@ export default function InventoryPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [prodRes, statsRes] = await Promise.allSettled([
-      api.get('/products', { params: { limit: 100, lowStock: filter === 'low' || filter === 'out' ? 'true' : '' } }),
-      api.get('/products/stats'),
-    ]);
-    if (prodRes.status === 'fulfilled') {
-      let data = prodRes.value.data.data;
-      if (filter === 'out') data = data.filter(p => p.quantity === 0);
-      setProducts(data);
+    try {
+      const [prodRes, statsRes] = await Promise.allSettled([
+        api.get('/products', { params: { limit: 100, lowStock: filter === 'low' || filter === 'out' ? 'true' : '' } }),
+        api.get('/products/stats'),
+      ]);
+      
+      if (prodRes.status === 'fulfilled') {
+        let data = prodRes.value.data?.data || [];
+        if (!Array.isArray(data)) data = [];
+        if (filter === 'out') data = data.filter(p => p && p.quantity === 0);
+        setProducts(data);
+      } else {
+        setProducts([]);
+      }
+      
+      if (statsRes.status === 'fulfilled') {
+        setStats(statsRes.value.data?.data || null);
+      }
+    } catch (err) {
+      setProducts([]);
+      setStats(null);
+    } finally {
+      setLoading(false);
     }
-    if (statsRes.status === 'fulfilled') setStats(statsRes.value.data.data);
-    setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, [filter]);
@@ -75,8 +88,9 @@ export default function InventoryPage() {
               {loading ? Array(8).fill(0).map((_, i) => (
                 <tr key={i} className="animate-pulse">{Array(6).fill(0).map((_, j) => <td key={j} className="table-td"><div className="h-4 bg-gray-100 rounded" /></td>)}</tr>
               )) : products.map(p => {
-                const isLow = p.quantity <= p.reorderLevel;
-                const isOut = p.quantity === 0;
+                if (!p) return null;
+                const isLow = (p.quantity || 0) <= (p.reorderLevel || 0);
+                const isOut = (p.quantity || 0) === 0;
                 return (
                   <tr key={p._id} className={`table-row ${isOut ? 'bg-red-50/30' : isLow ? 'bg-orange-50/30' : ''}`}>
                     <td className="table-td">
@@ -110,14 +124,14 @@ export default function InventoryPage() {
                       <div className="flex items-center gap-2">
                         {isLow && !isOut && <AlertTriangle size={14} className="text-orange-500" />}
                         {isOut && <AlertTriangle size={14} className="text-red-500" />}
-                        <span className={`font-bold ${isOut ? 'text-red-600' : isLow ? 'text-orange-600' : 'text-gray-900'}`}>{p.quantity} {p.unit}</span>
+                        <span className={`font-bold ${isOut ? 'text-red-600' : isLow ? 'text-orange-600' : 'text-gray-900'}`}>{p.quantity || 0} {p.unit || 'Piece'}</span>
                       </div>
                     </td>
-                    <td className="table-td text-sm text-gray-600">{p.reorderLevel} {p.unit}</td>
+                    <td className="table-td text-sm text-gray-600">{p.reorderLevel || 0} {p.unit || 'Piece'}</td>
                     <td className="table-td">
                       {isOut ? <StatusBadge status="out-of-stock" /> : isLow ? <StatusBadge status="low-stock" /> : <StatusBadge status="active" />}
                     </td>
-                    <td className="table-td font-semibold text-gray-900">₹{p.sellingPrice.toLocaleString('en-IN')}</td>
+                    <td className="table-td font-semibold text-gray-900">₹{(p.sellingPrice || 0).toLocaleString('en-IN')}</td>
                   </tr>
                 );
               })}
