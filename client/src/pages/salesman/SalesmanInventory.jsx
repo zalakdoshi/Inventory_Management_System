@@ -148,16 +148,18 @@ export default function SalesmanInventory() {
           status: 'active',
         },
       })
-      .then((r) => setProducts(r.data.data))
-      .catch(() => { })
+      .then((r) => setProducts(r.data?.data || []))
+      .catch(() => setProducts([]))
       .finally(() => setLoading(false));
   }, [search, categoryFilter]);
 
   // Premium Grouping Function to consolidate subtypes (MCBs, bearings, flap discs, hoses, etc.)
   const groupProducts = (list) => {
+    if (!list || !Array.isArray(list)) return [];
     const groups = {};
 
     list.forEach(p => {
+      if (!p || !p.name) return;
       const name = p.name.trim();
       const upperName = name.toUpperCase();
       let mainName = name;
