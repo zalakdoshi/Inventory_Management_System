@@ -138,6 +138,8 @@ function getImageForProduct(name, category) {
     if (n.includes('HEALTFO FAULET') || n.includes('HEALTFO')) return '/uploads/products/HEALTFO FAULET .png';
     if (n.includes('M S SOCKET') || n.includes('MS SOCKET')) return '/uploads/products/M S SOCKET.png';
     if (n.includes('M S DEAD PLUG') || n.includes('MS DEAD PLUG')) return '/uploads/products/M S DEAD PLUG.png';
+    if (n.includes('AIR GUN')) return '/uploads/products/AIR GUN.png';
+    if (n.includes('PU JOINT')) return '/uploads/products/PU JOINT.png';
   }
 
   if (cat === 'ELECTRICAL') {
