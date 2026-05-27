@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Flame, Wind, Shield, BarChart3, Package, Users, CheckCircle, Phone, Mail, MapPin, Menu, X, ChevronRight, Star, Zap, Globe } from 'lucide-react';
+import api from '../../api/axios';
+import toast from 'react-hot-toast';
 
 const NAV_LINKS = ['Home', 'About', 'Services', 'Products', 'Features', 'Contact'];
 
@@ -41,6 +43,7 @@ export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
   const [formSent, setFormSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 60);
@@ -48,11 +51,20 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  const handleContact = (e) => {
+  const handleContact = async (e) => {
     e.preventDefault();
-    setFormSent(true);
-    setTimeout(() => setFormSent(false), 4000);
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    setSubmitting(true);
+    try {
+      await api.post('/contact', formData);
+      setFormSent(true);
+      setTimeout(() => setFormSent(false), 5000);
+      setFormData({ name: '', email: '', phone: '', message: '' });
+      toast.success('Inquiry sent successfully!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to send message.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -291,7 +303,9 @@ export default function LandingPage() {
                 <label className="label">Message</label>
                 <textarea className="input-field" rows={4} placeholder="Tell us about your requirement..." value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} required />
               </div>
-              <button type="submit" className="btn-primary w-full py-3 text-base">Send Message</button>
+              <button type="submit" disabled={submitting} className="btn-primary w-full py-3 text-base">
+                {submitting ? 'Sending...' : 'Send Message'}
+              </button>
             </form>
           </div>
         </div>

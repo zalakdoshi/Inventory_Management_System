@@ -139,6 +139,56 @@ app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/password-reset', passwordResetRoutes);
 
+// ── Public Contact Us / Get In Touch Inquiry Route ────────────────
+const nodemailer = require('nodemailer');
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+
+    if (!name || !email || !message) {
+      return res.status(400).json({ success: false, message: 'Name, email, and message are required.' });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: `"Vardhman Family Web" <${process.env.EMAIL_USER}>`,
+      to: 'vardhmanfamily.corporate@gmail.com',
+      replyTo: email,
+      subject: `New Inquiry from Web: ${name}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:30px;border-radius:12px;border:1px solid #e5e7eb;">
+          <div style="background:#166534;padding:20px;border-radius:8px;text-align:center;margin-bottom:20px;">
+            <h1 style="color:white;margin:0;font-size:22px;">New Website Inquiry</h1>
+            <p style="color:#bbf7d0;margin:5px 0 0 0;font-size:14px;">Vardhman Family Biogas & CNG Solutions</p>
+          </div>
+          <div style="padding:10px 20px;background:white;border-radius:8px;border:1px solid #f3f4f6;">
+            <p style="margin:10px 0;"><strong>Name:</strong> ${name}</p>
+            <p style="margin:10px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color:#16a34a;">${email}</a></p>
+            <p style="margin:10px 0;"><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+            <hr style="border:0;border-top:1px solid #f3f4f6;margin:15px 0;" />
+            <p style="margin:10px 0;"><strong>Message/Query:</strong></p>
+            <div style="background:#f0fdf4;padding:15px;border-radius:6px;border-left:4px solid #16a34a;white-space:pre-wrap;font-style:italic;color:#374151;">${message}</div>
+          </div>
+          <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:20px;">This inquiry was sent automatically from the Vardhman Family contact form.</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ success: true, message: 'Message sent successfully.' });
+  } catch (error) {
+    logger.error('Contact Us email failed to send:', error);
+    res.status(500).json({ success: false, message: 'Failed to send message.' });
+  }
+});
+
 // ── Suppliers Route ─────────────────────────────────────────────
 const Supplier = require('./models/Supplier');
 const { protect, authorize } = require('./middleware/auth');
