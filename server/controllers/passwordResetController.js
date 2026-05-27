@@ -7,7 +7,7 @@ const logger = require('../utils/logger');
 
 const sendResetEmail = async (email, token, userName) => {
   try {
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
     });
