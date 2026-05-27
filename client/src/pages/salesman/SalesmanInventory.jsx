@@ -414,10 +414,10 @@ export default function SalesmanInventory() {
       });
     });
 
+    return Object.values(groups);
   };
 
   const groupedProducts = groupProducts(products);
-  console.log('🔎 DEPLOYED CATALOG DEBUG - Grouped Products:', groupedProducts);
 
   return (
     <div className="space-y-6">
