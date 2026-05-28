@@ -8,4 +8,4 @@ build/
 logs/
 invoices/
 exports/
-/server/uploads/
+# /server/uploads/
