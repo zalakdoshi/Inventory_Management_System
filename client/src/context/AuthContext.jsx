@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 
@@ -7,6 +7,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isLoggingOut = useRef(false);
 
   // Load user from localStorage on mount
   useEffect(() => {
@@ -41,6 +42,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(async () => {
+    if (isLoggingOut.current) return;
+    isLoggingOut.current = true;
     try {
       await api.post('/auth/logout');
     } catch {}
@@ -49,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     toast.success('Logged out successfully.');
     window.location.href = '/login';
+    isLoggingOut.current = false;
   }, []);
 
   const updateUser = useCallback((updatedUser) => {
