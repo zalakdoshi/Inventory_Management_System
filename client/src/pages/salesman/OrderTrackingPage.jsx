@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle, Clock, Package, Truck, MapPin, Plus, Download } from 'lucide-react';
 import api from '../../api/axios';
 import StatusBadge from '../../components/ui/StatusBadge';
+import SearchInput from '../../components/ui/SearchInput';
 import Modal from '../../components/ui/Modal';
 import toast from 'react-hot-toast';
 
@@ -46,15 +47,20 @@ export default function OrderTrackingPage() {
   const [newStatus, setNewStatus] = useState('');
   const [note, setNote] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [search, setSearch] = useState('');
 
   const fetchOrders = async () => {
     setLoading(true);
-    try { const { data } = await api.get('/orders', { params: { limit: 20 } }); setOrders(data.data); }
-    catch {}
+    try {
+      const { data } = await api.get('/orders', { params: { limit: 50, search } });
+      setOrders(data.data);
+    } catch {}
     setLoading(false);
   };
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => {
+    fetchOrders();
+  }, [search]);
 
   const downloadPDF = async (id) => {
     try {
@@ -88,6 +94,15 @@ export default function OrderTrackingPage() {
     <div className="space-y-6">
       <div><h1 className="page-title">Order Tracking</h1><p className="page-subtitle">Track and update order lifecycle</p></div>
 
+      <div className="card p-4">
+        <SearchInput
+          placeholder="Search order ID or customer..."
+          value={search}
+          onChange={setSearch}
+          className="max-w-sm"
+        />
+      </div>
+
       <div className="space-y-4">
         {loading ? Array(4).fill(0).map((_, i) => <div key={i} className="card p-5 animate-pulse space-y-3"><div className="h-4 bg-gray-100 rounded w-1/3" /><div className="h-3 bg-gray-100 rounded w-full" /></div>) :
           orders.length === 0 ? <div className="card p-12 text-center text-gray-400"><p>No orders yet</p></div> :
@@ -106,13 +121,22 @@ export default function OrderTrackingPage() {
                     <p className="text-sm text-gray-500">{order.customer?.phone} · {order.items?.length} items · ₹{order.totalAmount?.toLocaleString('en-IN')}</p>
                   </div>
                   <div className="flex gap-2 items-center">
-                    {order.bill && ['approved', 'packed', 'dispatched', 'delivered'].includes(order.status) && (
-                      <button
-                        onClick={() => downloadPDF(order.bill._id || order.bill)}
-                        className="flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-2 rounded-xl font-semibold transition-colors"
-                      >
-                        <Download size={13} /> Download Invoice
-                      </button>
+                    {order.bill && (
+                      ['approved', 'packed', 'dispatched', 'delivered'].includes(order.status) ? (
+                        <button
+                          onClick={() => downloadPDF(order.bill._id || order.bill)}
+                          className="flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-2 rounded-xl font-semibold transition-colors"
+                        >
+                          <Download size={13} /> Download Invoice
+                        </button>
+                      ) : (
+                        <span
+                          className="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-50 border border-gray-200 px-3 py-2 rounded-xl select-none cursor-not-allowed"
+                          title="Invoice is locked until order is approved."
+                        >
+                          <Download size={13} /> Awaiting Approval
+                        </span>
+                      )
                     )}
                     {nextOptions.length > 0 && (
                       <button onClick={() => { setSelectedOrder(order); setStatusModal(true); setNewStatus(nextOptions[0]); }}

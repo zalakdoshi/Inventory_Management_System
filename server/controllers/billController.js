@@ -90,15 +90,40 @@ const createBill = async (req, res) => {
           order.timeline.push({ status: order.status, updatedBy: req.user._id, note: `Invoice ${bill.billId} generated` });
           await order.save();
         }
+        bill.order = matchingOrders[0]._id;
+        await bill.save();
         logger.info(`Linked ${matchingOrders.length} matching order(s) for customer "${customer.name}" via invoice ${bill.billId}`);
       }
     }
 
-    // If standalone invoice, deduct inventory directly
+    // If standalone invoice, auto-create a matching Order in 'created' status
     if (!isLinkedToOrder) {
-      for (const item of processedItems) {
-        await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
-      }
+      const order = await Order.create({
+        customer: bill.customer,
+        items: bill.items.map(item => ({
+          product: item.product,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          gstPercentage: item.gstPercentage,
+          cgst: item.cgst,
+          sgst: item.sgst,
+          igst: item.igst,
+          totalPrice: item.totalAmount,
+        })),
+        subtotal: bill.subtotal,
+        discount: bill.discount,
+        taxAmount: bill.taxTotal,
+        totalAmount: bill.grandTotal,
+        paymentMode: bill.paymentMode,
+        taxType: bill.taxType,
+        createdBy: req.user._id,
+        bill: bill._id,
+        timeline: [{ status: 'created', updatedBy: req.user._id, note: `Order auto-created from standalone invoice ${bill.billId}` }],
+      });
+
+      bill.order = order._id;
+      await bill.save();
     }
 
     await createActivityLog({ user: req.user, action: 'CREATE', module: 'Bills', description: `Generated invoice ${bill.billId} for ${customer.name}`, details: { billId: bill._id }, req, severity: 'medium' });
@@ -111,8 +136,20 @@ const createBill = async (req, res) => {
 
 const generateBillPDF = async (req, res) => {
   try {
-    const bill = await Bill.findById(req.params.id).populate('createdBy', 'name');
+    const bill = await Bill.findById(req.params.id)
+      .populate('createdBy', 'name')
+      .populate('order');
     if (!bill) return res.status(404).json({ success: false, message: 'Bill not found.' });
+
+    // Restrict salesman role from downloading the invoice PDF until order is approved (stage 3 or later)
+    if (req.user.role === 'salesman' && bill.order) {
+      if (!['approved', 'packed', 'dispatched', 'delivered'].includes(bill.order.status)) {
+        return res.status(403).json({
+          success: false,
+          message: 'Invoice PDF download is locked until the order is approved.'
+        });
+      }
+    }
 
     const logoPath = path.join(__dirname, '../../client/public/logo.png');
     const doc = new PDFDocument({ size: 'A4', margin: 0 });
