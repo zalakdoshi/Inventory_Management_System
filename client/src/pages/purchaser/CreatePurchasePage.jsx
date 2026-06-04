@@ -1,22 +1,88 @@
-import { useState, useEffect } from 'react';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Trash2, Save, User } from 'lucide-react';
 import api from '../../api/axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { PRODUCT_CATEGORIES } from '../../constants';
+import { useAuth } from '../../context/AuthContext';
 
 export default function CreatePurchasePage() {
+  const { user } = useAuth();
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
-  const [form, setForm] = useState({ supplier: '', supplierName: '', invoiceNumber: '', purchaseDate: new Date().toISOString().split('T')[0], notes: '' });
+  const [supplierInput, setSupplierInput] = useState('');
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedSupplierId, setSelectedSupplierId] = useState('');
+  const [form, setForm] = useState({
+    invoiceNumber: '',
+    purchaseDate: new Date().toISOString().split('T')[0],
+    notes: '',
+  });
   const [items, setItems] = useState([{ product: '', productName: '', quantity: 1, unitPrice: '', gstPercentage: 18 }]);
   const [submitting, setSubmitting] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/suppliers').then(r => setSuppliers(r.data.data || [])).catch(() => {});
     api.get('/products', { params: { limit: 200, status: 'active' } }).then(r => setProducts(r.data.data || [])).catch(() => {});
   }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const handleSupplierInputChange = (val) => {
+    setSupplierInput(val);
+    setSelectedSupplierId('');
+    if (val.trim().length > 0) {
+      const filtered = suppliers.filter(s =>
+        s.name.toLowerCase().includes(val.toLowerCase())
+      );
+      setFilteredSuppliers(filtered);
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
+
+  const selectSupplier = (s) => {
+    setSupplierInput(s.name);
+    setSelectedSupplierId(s._id);
+    setShowDropdown(false);
+  };
+
+  // Resolve supplier: use existing or auto-create a new one
+  const resolveSupplier = async () => {
+    const name = supplierInput.trim();
+    if (!name) return { supplierId: '', supplierName: '' };
+
+    if (selectedSupplierId) {
+      return { supplierId: selectedSupplierId, supplierName: name };
+    }
+
+    // Check if exact name already exists
+    const existing = suppliers.find(s => s.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      return { supplierId: existing._id, supplierName: existing.name };
+    }
+
+    // Auto-create new supplier
+    try {
+      const { data } = await api.post('/suppliers', { name });
+      toast.success(`New supplier "${name}" added automatically!`);
+      return { supplierId: data.data._id, supplierName: data.data.name };
+    } catch {
+      return { supplierId: '', supplierName: name };
+    }
+  };
 
   const addItem = () => setItems([...items, { product: '', productName: '', quantity: 1, unitPrice: '', gstPercentage: 18 }]);
   const removeItem = (i) => setItems(items.filter((_, idx) => idx !== i));
@@ -26,7 +92,11 @@ export default function CreatePurchasePage() {
     updated[i] = { ...updated[i], [field]: value };
     if (field === 'product') {
       const prod = products.find(p => p._id === value);
-      if (prod) { updated[i].productName = prod.name; updated[i].unitPrice = prod.purchasePrice; updated[i].gstPercentage = prod.gstPercentage; }
+      if (prod) {
+        updated[i].productName = prod.name;
+        updated[i].unitPrice = prod.purchasePrice;
+        updated[i].gstPercentage = prod.gstPercentage;
+      }
     }
     setItems(updated);
   };
@@ -45,42 +115,98 @@ export default function CreatePurchasePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (items.some(i => !i.product || !i.unitPrice)) { toast.error('All items need a product and price.'); return; }
+    if (items.some(i => !i.product || !i.unitPrice)) {
+      toast.error('All items need a product and price.');
+      return;
+    }
     setSubmitting(true);
     try {
-      await api.post('/purchases', { ...form, items });
+      const { supplierId, supplierName } = await resolveSupplier();
+      await api.post('/purchases', {
+        ...form,
+        supplier: supplierId || undefined,
+        supplierName: supplierName || undefined,
+        items,
+      });
       toast.success('Purchase order created! Inventory updated.');
       navigate('/purchaser/purchases');
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed.'); }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed.');
+    }
     setSubmitting(false);
   };
 
   return (
     <div className="space-y-6">
-      <div><h1 className="page-title">Create Purchase Order</h1><p className="page-subtitle">Add new stock to inventory</p></div>
+      <div>
+        <h1 className="page-title">Create Purchase Order</h1>
+        <p className="page-subtitle">Add new stock to inventory</p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* PO Details */}
+        {/* Purchase Details */}
         <div className="card p-6">
           <h3 className="font-semibold text-gray-900 mb-4">Purchase Details</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            {/* Purchaser Name (auto-filled, read-only) */}
             <div className="form-group sm:col-span-2">
-              <label className="label">Supplier</label>
-              <select className="select-field" value={form.supplier} onChange={e => {
-                const s = suppliers.find(s => s._id === e.target.value);
-                setForm({...form, supplier: e.target.value, supplierName: s?.name || ''});
-              }}>
-                <option value="">Select Supplier</option>
-                {suppliers.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-              </select>
+              <label className="label flex items-center gap-1.5">
+                <User size={13} className="text-primary-600" /> Purchaser Name
+              </label>
+              <div className="input-field bg-gray-50 text-gray-700 font-semibold flex items-center gap-2 cursor-not-allowed">
+                <span className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  {user?.name?.charAt(0)?.toUpperCase()}
+                </span>
+                {user?.name}
+              </div>
             </div>
+
+            {/* Supplier (optional, autocomplete) */}
+            <div className="form-group sm:col-span-2" ref={dropdownRef}>
+              <label className="label">
+                Supplier <span className="text-gray-400 font-normal text-xs">(optional)</span>
+              </label>
+              <div className="relative">
+                <input
+                  className="input-field"
+                  value={supplierInput}
+                  onChange={e => handleSupplierInputChange(e.target.value)}
+                  onFocus={() => supplierInput && setShowDropdown(true)}
+                  placeholder="Type supplier name (auto-saves if new)"
+                  autoComplete="off"
+                />
+                {showDropdown && (
+                  <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                    {filteredSuppliers.length > 0 ? (
+                      filteredSuppliers.map(s => (
+                        <button
+                          key={s._id}
+                          type="button"
+                          onClick={() => selectSupplier(s)}
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        >
+                          <span className="font-semibold">{s.name}</span>
+                          {s.phone && <span className="text-gray-400 ml-2 text-xs">{s.phone}</span>}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-gray-500">
+                        <span className="font-semibold text-primary-600">"{supplierInput}"</span> — will be auto-created as new supplier
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="form-group">
               <label className="label">Invoice Number</label>
-              <input className="input-field" value={form.invoiceNumber} onChange={e => setForm({...form, invoiceNumber: e.target.value})} placeholder="Supplier invoice #" />
+              <input className="input-field" value={form.invoiceNumber} onChange={e => setForm({ ...form, invoiceNumber: e.target.value })} placeholder="Supplier invoice #" />
             </div>
             <div className="form-group">
               <label className="label">Purchase Date</label>
-              <input type="date" className="input-field" value={form.purchaseDate} onChange={e => setForm({...form, purchaseDate: e.target.value})} />
+              <input type="date" className="input-field" value={form.purchaseDate} onChange={e => setForm({ ...form, purchaseDate: e.target.value })} />
             </div>
           </div>
         </div>
@@ -89,7 +215,9 @@ export default function CreatePurchasePage() {
         <div className="card p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">Purchase Items</h3>
-            <button type="button" onClick={addItem} className="btn-secondary text-sm py-1.5 px-3 flex items-center gap-2"><Plus size={14} /> Add Item</button>
+            <button type="button" onClick={addItem} className="btn-secondary text-sm py-1.5 px-3 flex items-center gap-2">
+              <Plus size={14} /> Add Item
+            </button>
           </div>
           <div className="space-y-3">
             {items.map((item, i) => (
@@ -112,11 +240,13 @@ export default function CreatePurchasePage() {
                 <div className="col-span-3 sm:col-span-2">
                   <label className="label text-xs">GST %</label>
                   <select className="select-field text-sm" value={item.gstPercentage} onChange={e => updateItem(i, 'gstPercentage', Number(e.target.value))}>
-                    {[0,5,12,18,28].map(r => <option key={r} value={r}>{r}%</option>)}
+                    {[0, 5, 12, 18, 28].map(r => <option key={r} value={r}>{r}%</option>)}
                   </select>
                 </div>
                 <div className="col-span-3 sm:col-span-1 flex items-end">
-                  <p className="text-sm font-semibold text-gray-900 pb-2.5">₹{((parseFloat(item.unitPrice)||0)*(parseInt(item.quantity)||0)*((100+item.gstPercentage)/100)).toFixed(0)}</p>
+                  <p className="text-sm font-semibold text-gray-900 pb-2.5">
+                    ₹{((parseFloat(item.unitPrice) || 0) * (parseInt(item.quantity) || 0) * ((100 + item.gstPercentage) / 100)).toFixed(0)}
+                  </p>
                 </div>
                 <div className="col-span-2 sm:col-span-1 flex items-end justify-end">
                   <button type="button" onClick={() => removeItem(i)} disabled={items.length === 1} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-30">
@@ -139,7 +269,7 @@ export default function CreatePurchasePage() {
           </div>
           <div className="mt-4">
             <label className="label">Notes</label>
-            <textarea className="input-field" rows={2} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} placeholder="Additional notes..." />
+            <textarea className="input-field" rows={2} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Additional notes..." />
           </div>
         </div>
 

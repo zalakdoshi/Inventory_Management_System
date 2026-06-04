@@ -1,0 +1,1323 @@
+{
+  "info": {
+    "_postman_id": "c1f73745-9854-477c-a0e2-7634f19b52a1",
+    "name": "Inventory Management System API",
+    "description": "API collection for the Inventory Management System (Vardhman Family ERP)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "General & Public",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Checks the health status of the API."
+          },
+          "response": []
+        },
+        {
+          "name": "API Info / Endpoints Summary",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Returns details about API version and base routes."
+          },
+          "response": []
+        },
+        {
+          "name": "Contact Inquiry",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"phone\": \"9876543210\",\n  \"message\": \"I am interested in your bio-gas solutions. Please contact me.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contact",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "contact"
+              ]
+            },
+            "description": "Submit a contact us / get-in-touch inquiry. Sends an email to corporate."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registers a new user (admin, purchaser, or salesman)."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Logs in a user and returns a JWT token. Also automatically updates the {{token}} environment/collection variable via Postman Test Script."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Gets details of currently logged-in user profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logs out currently authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newPassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "change-password"
+              ]
+            },
+            "description": "Changes the password of the currently authenticated user."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Password Reset",
+      "item": [
+        {
+          "name": "Submit Reset Request",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/password-reset/request",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "password-reset",
+                "request"
+              ]
+            },
+            "description": "Submits a password reset request which requires admin approval."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reset Requests (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/password-reset?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "password-reset"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "Optional: pending, approved, rejected"
+                }
+              ]
+            },
+            "description": "Retrieve list of all password reset requests (Admin only)."
+          },
+          "response": []
+        },
+        {
+          "name": "Approve or Reject Reset Request (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\",\n  \"adminNote\": \"Approved. User notified.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/password-reset/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "password-reset",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "request_id_here"
+                }
+              ]
+            },
+            "description": "Admin action to approve or reject a password reset request. Approving will email a secure link to the user."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Password Reset",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"token_received_in_email\",\n  \"newPassword\": \"myNewSecurePassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/password-reset/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "password-reset",
+                "confirm"
+              ]
+            },
+            "description": "Confirms the password reset using the token emailed from approval."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get Inventory Stats (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "stats"
+              ]
+            },
+            "description": "Gets dashboard product inventory analytics: totals, low stock, out of stock, byCategory count/valuation."
+          },
+          "response": []
+        },
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products?page=1&limit=10&search=&category=&status=active&lowStock=false&sortBy=createdAt&sortOrder=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "category",
+                  "value": "",
+                  "description": "Electrical, Hydraulic, Bearing, Consumable"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "active, inactive, discontinued"
+                },
+                {
+                  "key": "lowStock",
+                  "value": "false",
+                  "description": "true/false"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc"
+                }
+              ]
+            },
+            "description": "List all products with comprehensive pagination, search, sorting and filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            },
+            "description": "Retrieves detail of a single product including populated supplier details."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product (Admin Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Brass Connector 1/2 inch\",\n  \"category\": \"Hydraulic\",\n  \"sellingPrice\": 150,\n  \"purchasePrice\": 95,\n  \"quantity\": 120,\n  \"unit\": \"Piece\",\n  \"supplier\": \"supplier_id_here\",\n  \"gstPercentage\": 18,\n  \"barcode\": \"BRS-12-CONN\",\n  \"description\": \"Heavy duty brass hydraulic connector\",\n  \"reorderLevel\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "Creates a new product in the database. Can also be sent as form-data if uploading an image file (field key 'image')."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Brass Connector 1/2 inch Updated\",\n  \"sellingPrice\": 160,\n  \"purchasePrice\": 98,\n  \"reorderLevel\": 30\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            },
+            "description": "Updates product details. Can be sent as JSON or form-data (if updating product image file)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product (Admin Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            },
+            "description": "Permanently deletes a product and removes its associated image file from disk."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Suppliers",
+      "item": [
+        {
+          "name": "Get Suppliers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/suppliers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "suppliers"
+              ]
+            },
+            "description": "List all active suppliers."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Supplier (Admin/Purchaser)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Reliable Hydraulics Private Ltd\",\n  \"contactPerson\": \"Amit Sharma\",\n  \"phone\": \"+91 9898012345\",\n  \"email\": \"amit@reliablehydraulics.com\",\n  \"gstin\": \"24AAACR1234F1Z4\",\n  \"address\": {\n    \"street\": \"GIDC Phase 2, Plot 45\",\n    \"city\": \"Anand\",\n    \"state\": \"Gujarat\",\n    \"pincode\": \"388001\"\n  },\n  \"categories\": [\"Hydraulic\", \"Consumable\"],\n  \"notes\": \"Direct manufacturer of high quality fittings\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/suppliers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "suppliers"
+              ]
+            },
+            "description": "Creates a new supplier (Admin & Purchaser role access)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Supplier (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactPerson\": \"Amit K. Sharma\",\n  \"phone\": \"+91 9898012346\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/suppliers/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "supplier_id_here"
+                }
+              ]
+            },
+            "description": "Updates supplier details (Admin only)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Supplier (Admin Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/suppliers/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "suppliers",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "supplier_id_here"
+                }
+              ]
+            },
+            "description": "Deletes a supplier record (Admin only)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Purchases",
+      "item": [
+        {
+          "name": "Get Purchases",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases?page=1&limit=10&status=received&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchases"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "received",
+                  "description": "Optional: received, pending, cancelled"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by purchase ID"
+                }
+              ]
+            },
+            "description": "Retrieve purchases list. Purchasers only see their own. Admins see all."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Purchase (Auto Updates Inventory)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplier\": \"supplier_id_here\",\n  \"supplierName\": \"Reliable Hydraulics Private Ltd\",\n  \"invoiceNumber\": \"INV-2026-9043\",\n  \"purchaseDate\": \"2026-06-03T00:00:00.000Z\",\n  \"notes\": \"Special discount applied on bulk buy\",\n  \"items\": [\n    {\n      \"product\": \"product_id_here\",\n      \"quantity\": 50,\n      \"unitPrice\": 90,\n      \"gstPercentage\": 18\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchases"
+              ]
+            },
+            "description": "Creates a purchase order, automatically calculates GST/totals, and increments stock levels in inventory."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Purchase",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Delivery delayed by 2 days. Items fully verified.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchases",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "purchase_id_here"
+                }
+              ]
+            },
+            "description": "Update purchase order notes/details. Only the creator or admin can update."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Purchase (Reverts Inventory Stock)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchases",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "purchase_id_here"
+                }
+              ]
+            },
+            "description": "Deletes the purchase record. If purchase status was 'received', it automatically reverses inventory stock additions."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get Orders List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?page=1&limit=10&status=created&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "status",
+                  "value": "created",
+                  "description": "created, pending, approved, packed, dispatched, delivered"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by orderId, customer name or phone"
+                }
+              ]
+            },
+            "description": "List client customer orders. Salesmen can only retrieve their own created orders."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order_id_here"
+                }
+              ]
+            },
+            "description": "Gets full populated information about a specific order, including its timeline."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Order (Validates Stock)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": {\n    \"name\": \"Anand Bio Gas Farm\",\n    \"phone\": \"9898989898\",\n    \"address\": \"GIDC Anand Gujarat 388001\",\n    \"gstin\": \"24ABCDE1234F1Z0\"\n  },\n  \"items\": [\n    {\n      \"product\": \"product_id_here\",\n      \"quantity\": 2,\n      \"unitPrice\": 150\n    }\n  ],\n  \"discount\": 10,\n  \"paymentMode\": \"bank_transfer\",\n  \"taxType\": \"cgst_sgst\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders"
+              ]
+            },
+            "description": "Creates an order. Performs stock check (errors if insufficient stock) and calculates taxable values and CGST/SGST/IGST accordingly."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order Status (Deducts Inventory on Approval)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"note\": \"Stock verified and approved for packing.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/:id/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                ":id",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order_id_here"
+                }
+              ]
+            },
+            "description": "Updates order status through the flow (created -> pending -> approved -> packed -> dispatched -> delivered). Inventory is auto-deducted from stock when status is changed to 'approved'."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bills & Invoices",
+      "item": [
+        {
+          "name": "Get Bills List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bills?page=1&limit=10&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bills"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by bill ID or customer name"
+                }
+              ]
+            },
+            "description": "Gets list of generated sales bills/invoices."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Bill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer\": {\n    \"name\": \"Anand Bio Gas Farm\",\n    \"phone\": \"9898989898\",\n    \"address\": \"GIDC Anand Gujarat 388001\",\n    \"gstin\": \"24ABCDE1234F1Z0\"\n  },\n  \"items\": [\n    {\n      \"productName\": \"Brass Connector 1/2 inch\",\n      \"hsnCode\": \"8412\",\n      \"quantity\": 2,\n      \"unit\": \"Piece\",\n      \"unitPrice\": 150,\n      \"gstPercentage\": 18\n    }\n  ],\n  \"discount\": 10,\n  \"paymentMode\": \"bank_transfer\",\n  \"taxType\": \"cgst_sgst\",\n  \"orderId\": \"order_id_here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bills"
+              ]
+            },
+            "description": "Generates a tax invoice, links it to an order (updates paymentStatus to 'paid') and updates log records."
+          },
+          "response": []
+        },
+        {
+          "name": "Download PDF Invoice",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bills/:id/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bills",
+                ":id",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "bill_id_here"
+                }
+              ]
+            },
+            "description": "Generates and streams a professional PDF Tax Invoice with company branding, tax breakdown tables, round-off calculations and terms."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reports & Analytics",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "dashboard"
+              ]
+            },
+            "description": "Retrieves comprehensive executive summaries: active products count, low stock, registered active users, total orders, monthly orders, aggregate revenues and cost margins, monthly revenue charts, and the 10 most recent activity logs."
+          },
+          "response": []
+        },
+        {
+          "name": "Export Report (Excel)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/export?type=sales&format=excel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "sales",
+                  "description": "sales, purchases, inventory"
+                },
+                {
+                  "key": "format",
+                  "value": "excel",
+                  "description": "excel"
+                }
+              ]
+            },
+            "description": "Generates and downloads a custom formatted Excel spreadsheet for sales invoices, purchases or product inventories (with conditional warning highlights for low-stock items)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get System Activity Logs (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/activity-logs?page=1&limit=20&module=&action=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "reports",
+                "activity-logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "module",
+                  "value": "",
+                  "description": "Optional: Products, Auth, Users, Orders, Purchases, Bills"
+                },
+                {
+                  "key": "action",
+                  "value": "",
+                  "description": "Optional: CREATE, UPDATE, DELETE, LOGIN, STATUS_CHANGE, PASSWORD_RESET..."
+                }
+              ]
+            },
+            "description": "Retrieve audit logs for operations in the system (Admin only)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin Only)",
+      "item": [
+        {
+          "name": "Get Users List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&limit=10&role=&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "admin, purchaser, salesman"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name or email"
+                }
+              ]
+            },
+            "description": "List all users in the ERP application (Admin only)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"password\": \"sales123\",\n  \"role\": \"salesman\",\n  \"phone\": \"9876123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Admin creates a new ERP user (salesman, purchaser, or admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Details",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane S. Smith\",\n  \"phone\": \"9876123400\",\n  \"role\": \"salesman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            },
+            "description": "Admin updates basic details or role of an existing user."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle User Status (Activate/Deactivate)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id/toggle-status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                ":id",
+                "toggle-status"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            },
+            "description": "Admin toggles user status. Deactivated users cannot log in to the ERP."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            },
+            "description": "Deletes a user account. Admin cannot delete their own account."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Automatically save token on login or register",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    var jsonData = pm.response.json();",
+          "    if (jsonData.token) {",
+          "        pm.collectionVariables.set(\"token\", jsonData.token);",
+          "        console.log(\"Saved JWT Token to variables: \", jsonData.token);",
+          "    }",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

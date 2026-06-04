@@ -55,7 +55,27 @@ const createBill = async (req, res) => {
     const roundOff = Math.round(grandTotalRaw) - grandTotalRaw;
     const grandTotal = Math.round(grandTotalRaw);
     const bill = await Bill.create({ customer, company: COMPANY, items: processedItems, subtotal, discount, cgstTotal, sgstTotal, igstTotal, taxTotal, roundOff, grandTotal, taxType, paymentMode, order: orderId || null, createdBy: req.user._id });
-    if (orderId) await Order.findByIdAndUpdate(orderId, { bill: bill._id, paymentStatus: 'paid' });
+    if (orderId) await Order.findByIdAndUpdate(orderId, { bill: bill._id, paymentStatus: 'paid', status: 'delivered' });
+
+    // Auto-complete matching orders for the same customer by this salesman
+    if (!orderId && customer?.name) {
+      const matchingOrders = await Order.find({
+        'customer.name': { $regex: new RegExp(`^${customer.name.trim()}$`, 'i') },
+        createdBy: req.user._id,
+        status: { $nin: ['delivered', 'cancelled'] },
+      });
+      for (const order of matchingOrders) {
+        order.status = 'delivered';
+        order.paymentStatus = 'paid';
+        order.bill = bill._id;
+        order.timeline.push({ status: 'delivered', updatedBy: req.user._id, note: `Auto-completed: Invoice ${bill.billId} generated` });
+        await order.save();
+      }
+      if (matchingOrders.length > 0) {
+        logger.info(`Auto-completed ${matchingOrders.length} order(s) for customer "${customer.name}" via invoice ${bill.billId}`);
+      }
+    }
+
     await createActivityLog({ user: req.user, action: 'CREATE', module: 'Bills', description: `Generated invoice ${bill.billId} for ${customer.name}`, details: { billId: bill._id }, req, severity: 'medium' });
     res.status(201).json({ success: true, message: 'Invoice created successfully.', data: bill });
   } catch (error) {

@@ -2,3 +2,4 @@
 2026-05-11 10:44:29 [error]: ❌ MongoDB Connection Error: Could not connect to any servers in your MongoDB Atlas cluster. One common reason is that you're trying to access the database from an IP that isn't whitelisted. Make sure your current IP address is on your Atlas cluster's IP whitelist: https://www.mongodb.com/docs/atlas/security-whitelist/
 2026-05-13 12:51:11 [error]: Email send error:
 2026-05-27 08:49:09 [error]: Error creating indexes:
+2026-06-03 19:31:08 [error]: Failed to create activity log:

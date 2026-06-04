@@ -49,7 +49,8 @@ export default function PurchaserDashboard() {
                 <div key={p._id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                   <div>
                     <p className="font-mono text-xs text-primary-700 font-semibold">{p.purchaseId}</p>
-                    <p className="text-sm text-gray-600">{p.supplierName || '—'} · {p.items?.length} items</p>
+                    <p className="text-sm text-gray-600">{p.supplierName || p.supplier?.name || 'No supplier'} · {p.items?.length} items</p>
+                    <p className="text-xs text-gray-400">By: {p.purchasedBy?.name || user?.name}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900">₹{p.totalAmount?.toLocaleString('en-IN')}</p>

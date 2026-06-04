@@ -6,7 +6,6 @@ import api from '../../api/axios';
 import toast from 'react-hot-toast';
 
 const ROLE_DEMO = [
-  { label: 'Admin',     email: 'admin@vardhman.com',     pass: 'admin123'    },
   { label: 'Purchaser', email: 'purchaser@vardhman.com', pass: 'purchaser123'},
   { label: 'Salesman',  email: 'salesman@vardhman.com',  pass: 'salesman123' },
 ];

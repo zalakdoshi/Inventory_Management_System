@@ -79,8 +79,8 @@ const createPurchase = async (req, res) => {
     }
 
     const purchase = await Purchase.create({
-      supplier,
-      supplierName,
+      supplier: supplier || null,
+      supplierName: supplierName || null,
       items: processedItems,
       subtotal,
       taxAmount,
