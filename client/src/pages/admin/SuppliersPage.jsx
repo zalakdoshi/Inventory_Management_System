@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, ClipboardList } from 'lucide-react';
 import api from '../../api/axios';
 import Modal from '../../components/ui/Modal';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -15,8 +15,9 @@ export default function SuppliersPage({ readOnly }) {
   const [form, setForm] = useState(EMPTY);
   const [submitting, setSubmitting] = useState(false);
 
-  // Expandable Purchaser purchases & tracking state
-  const [expandedSupplier, setExpandedSupplier] = useState(null);
+  // Purchaser tracking modal states
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [supplierPurchases, setSupplierPurchases] = useState([]);
   const [loadingPurchases, setLoadingPurchases] = useState(false);
 
@@ -33,17 +34,13 @@ export default function SuppliersPage({ readOnly }) {
     fetchSuppliers();
   }, []);
 
-  const handleToggleExpand = async (supplierId) => {
-    if (expandedSupplier === supplierId) {
-      setExpandedSupplier(null);
-      setSupplierPurchases([]);
-      return;
-    }
-    setExpandedSupplier(supplierId);
+  const handleOpenTracking = async (supplier) => {
+    setSelectedSupplier(supplier);
+    setTrackingModalOpen(true);
     setLoadingPurchases(true);
     setSupplierPurchases([]);
     try {
-      const { data } = await api.get('/purchases', { params: { supplier: supplierId, limit: 10 } });
+      const { data } = await api.get('/purchases', { params: { supplier: supplier._id, limit: 30 } });
       setSupplierPurchases(data.data || []);
     } catch (err) {
       toast.error('Failed to load purchase history.');
@@ -79,86 +76,43 @@ export default function SuppliersPage({ readOnly }) {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? Array(3).fill(0).map((_, i) => <div key={i} className="card p-5 animate-pulse space-y-3"><div className="h-4 bg-gray-100 rounded w-2/3" /><div className="h-3 bg-gray-100 rounded w-1/2" /></div>) :
-          suppliers.map(s => {
-            const isExpanded = expandedSupplier === s._id;
-            return (
-              <div key={s._id} className="card p-5 hover:shadow-card-hover transition-all flex flex-col justify-between">
-                <div>
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{s.name}</h3>
-                      {s.contactPerson && <p className="text-xs text-gray-400 font-medium">Contact: {s.contactPerson}</p>}
-                    </div>
-                    {!readOnly && (
-                      <div className="flex gap-1 flex-shrink-0">
-                        <button onClick={() => openEdit(s)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><Edit size={14} /></button>
-                        <button onClick={() => handleDelete(s._id)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /></button>
-                      </div>
-                    )}
+          suppliers.map(s => (
+            <div key={s._id} className="card p-5 hover:shadow-card-hover transition-all flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{s.name}</h3>
+                    {s.contactPerson && <p className="text-xs text-gray-400 font-medium">Contact: {s.contactPerson}</p>}
                   </div>
-                  <div className="space-y-1.5 text-sm text-gray-500 mb-4">
-                    {s.phone && <p className="flex items-center gap-1.5">📞 {s.phone}</p>}
-                    {s.email && <p className="flex items-center gap-1.5">✉️ {s.email}</p>}
-                    {s.gstin && <p className="font-mono text-xs flex items-center gap-1.5">🏷️ {s.gstin}</p>}
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-3 mt-auto">
-                  <button
-                    onClick={() => handleToggleExpand(s._id)}
-                    className="w-full flex items-center justify-between text-xs font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-2 rounded-xl transition-colors"
-                  >
-                    <span>{isExpanded ? 'Hide Purchases & Tracking' : 'View Purchases & Tracking'}</span>
-                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                  </button>
-
-                  {isExpanded && (
-                    <div className="mt-3 space-y-2.5 max-h-60 overflow-y-auto pr-1">
-                      <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Purchase Orders</h4>
-                      {loadingPurchases ? (
-                        <div className="space-y-2 py-2">
-                          <div className="h-10 bg-gray-50 rounded-xl animate-pulse" />
-                          <div className="h-10 bg-gray-50 rounded-xl animate-pulse" />
-                        </div>
-                      ) : supplierPurchases.length === 0 ? (
-                        <p className="text-xs text-gray-400 italic text-center py-4">No purchases from this purchaser.</p>
-                      ) : (
-                        supplierPurchases.map(p => (
-                          <div key={p._id} className="flex flex-col gap-1.5 p-2.5 bg-gray-50 rounded-xl text-xs border border-gray-100">
-                            <div className="flex justify-between items-center">
-                              <span className="font-mono font-bold text-primary-700">{p.purchaseId}</span>
-                              <StatusBadge status={p.status} size="xs" />
-                            </div>
-                            <div className="flex justify-between text-[11px] text-gray-500 font-medium">
-                              <span>₹{p.totalAmount?.toLocaleString('en-IN')} ({p.items?.length} items)</span>
-                              <span>{new Date(p.createdAt).toLocaleDateString('en-IN')}</span>
-                            </div>
-                            {/* Simple progress tracking timeline for purchases */}
-                            <div className="flex items-center gap-2 mt-1.5 bg-white p-1.5 rounded-lg border border-gray-200 justify-around">
-                              {['ordered', 'received'].map((st) => {
-                                const isDone = st === 'received' ? p.status === 'received' : ['ordered', 'received'].includes(p.status);
-                                return (
-                                  <div key={st} className="flex items-center gap-1">
-                                    <div className={`w-3 h-3 rounded-full flex items-center justify-center transition-colors ${isDone ? 'bg-green-500' : 'bg-gray-200'}`}>
-                                      {isDone && <div className="w-1.5 h-1.5 bg-white rounded-full animate-scale" />}
-                                    </div>
-                                    <span className={`text-[10px] capitalize font-semibold ${isDone ? 'text-gray-700' : 'text-gray-400'}`}>{st}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))
-                      )}
+                  {!readOnly && (
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button onClick={() => openEdit(s)} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"><Edit size={14} /></button>
+                      <button onClick={() => handleDelete(s._id)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /></button>
                     </div>
                   )}
                 </div>
+                <div className="space-y-1.5 text-sm text-gray-500 mb-4">
+                  {s.phone && <p className="flex items-center gap-1.5">📞 {s.phone}</p>}
+                  {s.email && <p className="flex items-center gap-1.5">✉️ {s.email}</p>}
+                  {s.gstin && <p className="font-mono text-xs flex items-center gap-1.5">🏷️ {s.gstin}</p>}
+                </div>
               </div>
-            );
-          })
+
+              <div className="border-t border-gray-100 pt-3 mt-auto">
+                <button
+                  onClick={() => handleOpenTracking(s)}
+                  className="w-full flex items-center justify-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-2.5 rounded-xl transition-colors"
+                >
+                  <ClipboardList size={14} />
+                  <span>View Purchases & Tracking</span>
+                </button>
+              </div>
+            </div>
+          ))
         }
       </div>
 
+      {/* Edit/Add Purchaser Modal */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editSupplier ? 'Edit Purchaser' : 'Add Purchaser'} size="lg"
         footer={<><button onClick={() => setModalOpen(false)} className="btn-secondary">Cancel</button>
           <button form="sup-form" type="submit" disabled={submitting} className="btn-primary">{submitting ? 'Saving...' : 'Save'}</button></>}>
@@ -172,6 +126,83 @@ export default function SuppliersPage({ readOnly }) {
           <div className="form-group"><label className="label">Pincode</label><input className="input-field" value={form.address?.pincode} onChange={e => setForm({...form, address: {...form.address, pincode: e.target.value}})} /></div>
           <div className="col-span-2 form-group"><label className="label">Notes</label><textarea className="input-field" rows={2} value={form.notes} onChange={e => setForm({...form, notes: e.target.value})} /></div>
         </form>
+      </Modal>
+
+      {/* Purchases & Tracking Modal */}
+      <Modal
+        isOpen={trackingModalOpen}
+        onClose={() => setTrackingModalOpen(false)}
+        title={`Purchase History & Tracking — ${selectedSupplier?.name || ''}`}
+        size="lg"
+        footer={<button onClick={() => setTrackingModalOpen(false)} className="btn-primary">Close</button>}
+      >
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-3 rounded-xl text-xs space-y-1 text-gray-500 border border-gray-100">
+            {selectedSupplier?.contactPerson && <p><strong>Contact Person:</strong> {selectedSupplier.contactPerson}</p>}
+            {selectedSupplier?.phone && <p><strong>Phone:</strong> {selectedSupplier.phone}</p>}
+            {selectedSupplier?.email && <p><strong>Email:</strong> {selectedSupplier.email}</p>}
+            {selectedSupplier?.gstin && <p><strong>GSTIN:</strong> <span className="font-mono">{selectedSupplier.gstin}</span></p>}
+          </div>
+
+          <div className="overflow-y-auto max-h-[60vh] pr-1 space-y-3">
+            {loadingPurchases ? (
+              <div className="space-y-2 py-4">
+                <div className="h-16 bg-gray-50 rounded-xl animate-pulse" />
+                <div className="h-16 bg-gray-50 rounded-xl animate-pulse" />
+                <div className="h-16 bg-gray-50 rounded-xl animate-pulse" />
+              </div>
+            ) : supplierPurchases.length === 0 ? (
+              <div className="text-center py-8 text-gray-400 italic text-sm">
+                No purchase orders recorded for this purchaser.
+              </div>
+            ) : (
+              supplierPurchases.map(p => (
+                <div key={p._id} className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm space-y-3">
+                  <div className="flex justify-between items-center flex-wrap gap-2">
+                    <div>
+                      <span className="font-mono font-bold text-primary-700 text-sm">{p.purchaseId}</span>
+                      {p.invoiceNumber && <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-2 font-mono">Inv: {p.invoiceNumber}</span>}
+                    </div>
+                    <StatusBadge status={p.status} />
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-gray-600">
+                    <div>
+                      <p className="text-gray-400 font-medium">Date</p>
+                      <p className="font-semibold flex items-center gap-1"><Calendar size={12} /> {new Date(p.createdAt).toLocaleDateString('en-IN')}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 font-medium">Items</p>
+                      <p className="font-semibold">{p.items?.length || 0} product(s)</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 font-medium">Grand Total</p>
+                      <p className="font-bold text-primary-600">₹{p.totalAmount?.toLocaleString('en-IN')}</p>
+                    </div>
+                  </div>
+
+                  {/* Visual tracking timeline */}
+                  <div className="pt-2 border-t border-gray-50">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Tracking Status</p>
+                    <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-xl justify-around border border-gray-100">
+                      {['ordered', 'received'].map((st) => {
+                        const isDone = st === 'received' ? p.status === 'received' : ['ordered', 'received'].includes(p.status);
+                        return (
+                          <div key={st} className="flex items-center gap-1.5">
+                            <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-colors ${isDone ? 'bg-green-500' : 'bg-gray-200'}`}>
+                              {isDone && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                            </div>
+                            <span className={`text-xs capitalize font-semibold ${isDone ? 'text-gray-700' : 'text-gray-400'}`}>{st}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </Modal>
     </div>
   );

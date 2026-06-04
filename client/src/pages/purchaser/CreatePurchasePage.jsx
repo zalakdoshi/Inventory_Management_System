@@ -119,6 +119,10 @@ export default function CreatePurchasePage() {
       toast.error('All items need a product and price.');
       return;
     }
+    if (!supplierInput.trim()) {
+      toast.error('Purchaser name is required.');
+      return;
+    }
     setSubmitting(true);
     try {
       const { supplierId, supplierName } = await resolveSupplier();
@@ -162,10 +166,10 @@ export default function CreatePurchasePage() {
               </div>
             </div>
 
-            {/* Purchaser Name (optional, autocomplete) */}
+            {/* Purchaser Name (autocomplete) */}
             <div className="form-group sm:col-span-2" ref={dropdownRef}>
               <label className="label">
-                Purchaser Name <span className="text-gray-400 font-normal text-xs">(optional)</span>
+                Purchaser Name *
               </label>
               <div className="relative">
                 <input
