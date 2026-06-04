@@ -1,5 +1,6 @@
 const Bill = require('../models/Bill');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 const { createActivityLog } = require('../middleware/activityLog');
 const PDFDocument = require('pdfkit');
 const path = require('path');
@@ -55,7 +56,29 @@ const createBill = async (req, res) => {
     const roundOff = Math.round(grandTotalRaw) - grandTotalRaw;
     const grandTotal = Math.round(grandTotalRaw);
     const bill = await Bill.create({ customer, company: COMPANY, items: processedItems, subtotal, discount, cgstTotal, sgstTotal, igstTotal, taxTotal, roundOff, grandTotal, taxType, paymentMode, order: orderId || null, createdBy: req.user._id });
-    if (orderId) await Order.findByIdAndUpdate(orderId, { bill: bill._id, paymentStatus: 'paid', status: 'delivered' });
+    
+    let isLinkedToOrder = false;
+
+    if (orderId) {
+      const order = await Order.findById(orderId);
+      if (order) {
+        isLinkedToOrder = true;
+        const oldStatus = order.status;
+        order.bill = bill._id;
+        order.paymentStatus = 'paid';
+        order.status = 'delivered';
+        order.timeline.push({ status: 'delivered', updatedBy: req.user._id, note: `Invoice ${bill.billId} generated` });
+
+        // Deduct inventory if not already in a deducted state
+        const oldDeducted = ['approved', 'packed', 'dispatched', 'delivered'].includes(oldStatus);
+        if (!oldDeducted) {
+          for (const item of order.items) {
+            await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
+          }
+        }
+        await order.save();
+      }
+    }
 
     // Auto-complete matching orders for the same customer by this salesman
     if (!orderId && customer?.name) {
@@ -64,15 +87,32 @@ const createBill = async (req, res) => {
         createdBy: req.user._id,
         status: { $nin: ['delivered', 'cancelled'] },
       });
-      for (const order of matchingOrders) {
-        order.status = 'delivered';
-        order.paymentStatus = 'paid';
-        order.bill = bill._id;
-        order.timeline.push({ status: 'delivered', updatedBy: req.user._id, note: `Auto-completed: Invoice ${bill.billId} generated` });
-        await order.save();
-      }
       if (matchingOrders.length > 0) {
+        isLinkedToOrder = true;
+        for (const order of matchingOrders) {
+          const oldStatus = order.status;
+          order.status = 'delivered';
+          order.paymentStatus = 'paid';
+          order.bill = bill._id;
+          order.timeline.push({ status: 'delivered', updatedBy: req.user._id, note: `Auto-completed: Invoice ${bill.billId} generated` });
+          
+          // Deduct inventory if not already in a deducted state
+          const oldDeducted = ['approved', 'packed', 'dispatched', 'delivered'].includes(oldStatus);
+          if (!oldDeducted) {
+            for (const item of order.items) {
+              await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
+            }
+          }
+          await order.save();
+        }
         logger.info(`Auto-completed ${matchingOrders.length} order(s) for customer "${customer.name}" via invoice ${bill.billId}`);
+      }
+    }
+
+    // If standalone invoice, deduct inventory directly
+    if (!isLinkedToOrder) {
+      for (const item of processedItems) {
+        await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
       }
     }
 

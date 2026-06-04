@@ -77,7 +77,7 @@ export default function CreatePurchasePage() {
     // Auto-create new supplier
     try {
       const { data } = await api.post('/suppliers', { name });
-      toast.success(`New supplier "${name}" added automatically!`);
+      toast.success(`New purchaser "${name}" added automatically!`);
       return { supplierId: data.data._id, supplierName: data.data.name };
     } catch {
       return { supplierId: '', supplierName: name };
@@ -149,10 +149,10 @@ export default function CreatePurchasePage() {
           <h3 className="font-semibold text-gray-900 mb-4">Purchase Details</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-            {/* Purchaser Name (auto-filled, read-only) */}
+            {/* Employee Name (auto-filled, read-only) */}
             <div className="form-group sm:col-span-2">
               <label className="label flex items-center gap-1.5">
-                <User size={13} className="text-primary-600" /> Purchaser Name
+                <User size={13} className="text-primary-600" /> Employee Name
               </label>
               <div className="input-field bg-gray-50 text-gray-700 font-semibold flex items-center gap-2 cursor-not-allowed">
                 <span className="w-7 h-7 rounded-full bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
@@ -162,10 +162,10 @@ export default function CreatePurchasePage() {
               </div>
             </div>
 
-            {/* Supplier (optional, autocomplete) */}
+            {/* Purchaser Name (optional, autocomplete) */}
             <div className="form-group sm:col-span-2" ref={dropdownRef}>
               <label className="label">
-                Supplier <span className="text-gray-400 font-normal text-xs">(optional)</span>
+                Purchaser Name <span className="text-gray-400 font-normal text-xs">(optional)</span>
               </label>
               <div className="relative">
                 <input
@@ -173,7 +173,7 @@ export default function CreatePurchasePage() {
                   value={supplierInput}
                   onChange={e => handleSupplierInputChange(e.target.value)}
                   onFocus={() => supplierInput && setShowDropdown(true)}
-                  placeholder="Type supplier name (auto-saves if new)"
+                  placeholder="Type purchaser name (auto-saves if new)"
                   autoComplete="off"
                 />
                 {showDropdown && (
@@ -192,7 +192,7 @@ export default function CreatePurchasePage() {
                       ))
                     ) : (
                       <div className="px-4 py-3 text-sm text-gray-500">
-                        <span className="font-semibold text-primary-600">"{supplierInput}"</span> — will be auto-created as new supplier
+                        <span className="font-semibold text-primary-600">"{supplierInput}"</span> — will be auto-created as new purchaser
                       </div>
                     )}
                   </div>

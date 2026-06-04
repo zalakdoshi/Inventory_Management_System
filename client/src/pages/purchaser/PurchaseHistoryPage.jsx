@@ -39,7 +39,7 @@ export default function PurchaseHistoryPage() {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr>{['PO ID', 'Purchaser', 'Supplier', 'Items', 'Subtotal', 'Tax', 'Total', 'Status', 'Date', 'Actions'].map(h => <th key={h} className="table-th">{h}</th>)}</tr></thead>
+            <thead><tr>{['PO ID', 'Employee', 'Purchaser Name', 'Items', 'Subtotal', 'Tax', 'Total', 'Status', 'Date', 'Actions'].map(h => <th key={h} className="table-th">{h}</th>)}</tr></thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? Array(5).fill(0).map((_, i) => <tr key={i} className="animate-pulse">{Array(10).fill(0).map((_, j) => <td key={j} className="table-td"><div className="h-4 bg-gray-100 rounded" /></td>)}</tr>) :
                 purchases.length === 0 ? (

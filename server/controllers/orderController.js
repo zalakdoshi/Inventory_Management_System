@@ -159,17 +159,28 @@ const updateOrderStatus = async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, message: 'Order not found.' });
 
-    // Deduct inventory on approval
-    if (status === 'approved' && order.status !== 'approved') {
+    const oldDeducted = ['approved', 'packed', 'dispatched', 'delivered'].includes(order.status);
+    const newDeducted = ['approved', 'packed', 'dispatched', 'delivered'].includes(status);
+
+    if (!oldDeducted && newDeducted) {
+      // Check stock first
       for (const item of order.items) {
         const product = await Product.findById(item.product);
-        if (product.quantity < item.quantity) {
+        if (!product || product.quantity < item.quantity) {
           return res.status(400).json({
             success: false,
-            message: `Insufficient stock for ${item.productName}`,
+            message: `Insufficient stock for ${item.productName}. Available: ${product ? product.quantity : 0}`,
           });
         }
+      }
+      // Deduct stock
+      for (const item of order.items) {
         await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
+      }
+    } else if (oldDeducted && !newDeducted) {
+      // Restore stock (e.g., cancelled or downgraded back to created/pending)
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
       }
     }
 

@@ -68,7 +68,7 @@ export const ADMIN_NAV = [
   { path: '/admin/purchases', label: 'Purchases', icon: 'ShoppingCart' },
   { path: '/admin/orders', label: 'Orders', icon: 'ClipboardList' },
   { path: '/admin/bills', label: 'Invoices', icon: 'FileText' },
-  { path: '/admin/suppliers', label: 'Suppliers', icon: 'Truck' },
+  { path: '/admin/suppliers', label: 'Purchasers', icon: 'Truck' },
   { path: '/admin/reports', label: 'Reports', icon: 'BarChart3' },
   { path: '/admin/users', label: 'Users', icon: 'Users' },
   { path: '/admin/activity-logs', label: 'Activity Logs', icon: 'Activity' },
@@ -79,7 +79,7 @@ export const PURCHASER_NAV = [
   { path: '/purchaser/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
   { path: '/purchaser/create-purchase', label: 'New Purchase', icon: 'Plus' },
   { path: '/purchaser/purchases', label: 'Purchase History', icon: 'ShoppingCart' },
-  { path: '/purchaser/suppliers', label: 'Suppliers', icon: 'Truck' },
+  { path: '/purchaser/suppliers', label: 'Purchasers', icon: 'Truck' },
 ];
 
 export const SALESMAN_NAV = [

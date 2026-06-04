@@ -29,15 +29,15 @@ export default function SuppliersPage({ readOnly }) {
   const handleSubmit = async (e) => {
     e.preventDefault(); setSubmitting(true);
     try {
-      if (editSupplier) { await api.put(`/suppliers/${editSupplier._id}`, form); toast.success('Supplier updated!'); }
-      else { await api.post('/suppliers', form); toast.success('Supplier created!'); }
+      if (editSupplier) { await api.put(`/suppliers/${editSupplier._id}`, form); toast.success('Purchaser updated!'); }
+      else { await api.post('/suppliers', form); toast.success('Purchaser created!'); }
       setModalOpen(false); fetchSuppliers();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed.'); }
     setSubmitting(false);
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete supplier?')) return;
+    if (!confirm('Delete purchaser?')) return;
     try { await api.delete(`/suppliers/${id}`); toast.success('Deleted.'); fetchSuppliers(); }
     catch { toast.error('Delete failed.'); }
   };
@@ -45,8 +45,8 @@ export default function SuppliersPage({ readOnly }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <div><h1 className="page-title">Suppliers</h1><p className="page-subtitle">{suppliers.length} suppliers</p></div>
-        {!readOnly && <button onClick={openCreate} className="btn-primary flex items-center gap-2"><Plus size={16} /> Add Supplier</button>}
+        <div><h1 className="page-title">Purchasers</h1><p className="page-subtitle">{suppliers.length} purchasers</p></div>
+        {!readOnly && <button onClick={openCreate} className="btn-primary flex items-center gap-2"><Plus size={16} /> Add Purchaser</button>}
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? Array(3).fill(0).map((_, i) => <div key={i} className="card p-5 animate-pulse space-y-3"><div className="h-4 bg-gray-100 rounded w-2/3" /><div className="h-3 bg-gray-100 rounded w-1/2" /></div>) :
@@ -69,7 +69,7 @@ export default function SuppliersPage({ readOnly }) {
         }
       </div>
 
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editSupplier ? 'Edit Supplier' : 'Add Supplier'} size="lg"
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editSupplier ? 'Edit Purchaser' : 'Add Purchaser'} size="lg"
         footer={<><button onClick={() => setModalOpen(false)} className="btn-secondary">Cancel</button>
           <button form="sup-form" type="submit" disabled={submitting} className="btn-primary">{submitting ? 'Saving...' : 'Save'}</button></>}>
         <form id="sup-form" onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">

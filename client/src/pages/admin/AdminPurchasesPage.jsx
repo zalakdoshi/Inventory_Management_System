@@ -24,7 +24,7 @@ export default function AdminPurchasesPage() {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead><tr>{['PO ID','Supplier','Items','Subtotal','Tax','Total','Status','Purchased By','Date'].map(h => <th key={h} className="table-th">{h}</th>)}</tr></thead>
+            <thead><tr>{['PO ID','Purchaser Name','Items','Subtotal','Tax','Total','Status','Employee','Date'].map(h => <th key={h} className="table-th">{h}</th>)}</tr></thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? Array(5).fill(0).map((_, i) => (
                 <tr key={i} className="animate-pulse">{Array(9).fill(0).map((_, j) => <td key={j} className="table-td"><div className="h-3 bg-gray-100 rounded" /></td>)}</tr>
