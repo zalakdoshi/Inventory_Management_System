@@ -9,7 +9,7 @@ const logger = require('../utils/logger');
  */
 const getPurchases = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status = '', search = '' } = req.query;
+    const { page = 1, limit = 10, status = '', search = '', supplier = '' } = req.query;
     const query = {};
 
     // Purchaser sees only their own
@@ -18,6 +18,14 @@ const getPurchases = async (req, res) => {
     }
     if (status) query.status = status;
     if (search) query.purchaseId = { $regex: search, $options: 'i' };
+    if (supplier) {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(supplier)) {
+        query.supplier = supplier;
+      } else {
+        query.supplierName = { $regex: new RegExp(`^${supplier.trim()}$`, 'i') };
+      }
+    }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [purchases, total] = await Promise.all([
