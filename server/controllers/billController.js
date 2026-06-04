@@ -68,19 +68,9 @@ const createBill = async (req, res) => {
       const order = await Order.findById(orderId);
       if (order) {
         isLinkedToOrder = true;
-        const oldStatus = order.status;
         order.bill = bill._id;
         order.paymentStatus = 'paid';
-        order.status = 'delivered';
-        order.timeline.push({ status: 'delivered', updatedBy: req.user._id, note: `Invoice ${bill.billId} generated` });
-
-        // Deduct inventory if not already in a deducted state
-        const oldDeducted = ['approved', 'packed', 'dispatched', 'delivered'].includes(oldStatus);
-        if (!oldDeducted) {
-          for (const item of order.items) {
-            await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
-          }
-        }
+        order.timeline.push({ status: order.status, updatedBy: req.user._id, note: `Invoice ${bill.billId} generated` });
         await order.save();
       }
     }
@@ -95,22 +85,12 @@ const createBill = async (req, res) => {
       if (matchingOrders.length > 0) {
         isLinkedToOrder = true;
         for (const order of matchingOrders) {
-          const oldStatus = order.status;
-          order.status = 'delivered';
-          order.paymentStatus = 'paid';
           order.bill = bill._id;
-          order.timeline.push({ status: 'delivered', updatedBy: req.user._id, note: `Auto-completed: Invoice ${bill.billId} generated` });
-          
-          // Deduct inventory if not already in a deducted state
-          const oldDeducted = ['approved', 'packed', 'dispatched', 'delivered'].includes(oldStatus);
-          if (!oldDeducted) {
-            for (const item of order.items) {
-              await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
-            }
-          }
+          order.paymentStatus = 'paid';
+          order.timeline.push({ status: order.status, updatedBy: req.user._id, note: `Invoice ${bill.billId} generated` });
           await order.save();
         }
-        logger.info(`Auto-completed ${matchingOrders.length} order(s) for customer "${customer.name}" via invoice ${bill.billId}`);
+        logger.info(`Linked ${matchingOrders.length} matching order(s) for customer "${customer.name}" via invoice ${bill.billId}`);
       }
     }
 

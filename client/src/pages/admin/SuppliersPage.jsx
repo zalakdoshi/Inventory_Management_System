@@ -187,31 +187,27 @@ export default function SuppliersPage({ readOnly }) {
                       <span className="font-mono font-bold text-primary-700 text-sm">{p.purchaseId}</span>
                       {p.invoiceNumber && <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded ml-2 font-mono">Inv: {p.invoiceNumber}</span>}
                     </div>
-                    {p.status === 'ordered' ? (
-                      <select
-                        value={p.status}
-                        onChange={async (e) => {
-                          const val = e.target.value;
-                          if (val === p.status) return;
-                          try {
-                            await api.put(`/purchases/${p._id}`, { status: val });
-                            toast.success(`Purchase status updated to ${val}`);
-                            // Reload modal purchases list
-                            const { data } = await api.get('/purchases', { params: { supplier: selectedSupplier._id, limit: 100 } });
-                            setSupplierPurchases(data.data || []);
-                          } catch (err) {
-                            toast.error(err.response?.data?.message || 'Update failed.');
-                          }
-                        }}
-                        className="border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-semibold bg-white cursor-pointer select-field outline-none focus:ring-1 focus:ring-primary-500"
-                      >
-                        <option value="ordered">Ordered</option>
-                        <option value="received">Received</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                    ) : (
-                      <StatusBadge status={p.status} />
-                    )}
+                    <select
+                      value={p.status}
+                      onChange={async (e) => {
+                        const val = e.target.value;
+                        if (val === p.status) return;
+                        try {
+                          await api.put(`/purchases/${p._id}`, { status: val });
+                          toast.success(`Purchase status updated to ${val}`);
+                          // Reload modal purchases list
+                          const { data } = await api.get('/purchases', { params: { supplier: selectedSupplier._id, limit: 100 } });
+                          setSupplierPurchases(data.data || []);
+                        } catch (err) {
+                          toast.error(err.response?.data?.message || 'Update failed.');
+                        }
+                      }}
+                      className="border border-gray-200 rounded-xl px-2.5 py-1 text-xs font-semibold bg-white cursor-pointer select-field outline-none focus:ring-1 focus:ring-primary-500"
+                    >
+                      <option value="ordered">Ordered</option>
+                      <option value="received">Received (Adds to stock)</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-gray-600">

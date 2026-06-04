@@ -96,15 +96,13 @@ export default function PurchaseHistoryPage() {
                     <td className="table-td text-xs text-gray-400">{new Date(p.createdAt).toLocaleDateString('en-IN')}</td>
                     <td className="table-td">
                       <div className="flex items-center gap-1.5">
-                        {p.status === 'ordered' && (
-                          <button
-                            onClick={() => openStatusUpdate(p)}
-                            title="Update Status"
-                            className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                          >
-                            <Edit size={14} />
-                          </button>
-                        )}
+                        <button
+                          onClick={() => openStatusUpdate(p)}
+                          title="Update Status"
+                          className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        >
+                          <Edit size={14} />
+                        </button>
                         <button onClick={() => handleDelete(p._id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /></button>
                       </div>
                     </td>
