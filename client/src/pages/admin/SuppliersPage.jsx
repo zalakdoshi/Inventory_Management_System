@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Calendar, ClipboardList } from 'lucide-react';
 import api from '../../api/axios';
 import Modal from '../../components/ui/Modal';
 import StatusBadge from '../../components/ui/StatusBadge';
+import SearchInput from '../../components/ui/SearchInput';
 import toast from 'react-hot-toast';
 
 const EMPTY = { name: '', contactPerson: '', phone: '', email: '', gstin: '', address: { street: '', city: '', state: 'Gujarat', pincode: '' }, notes: '' };
@@ -20,6 +21,7 @@ export default function SuppliersPage({ readOnly }) {
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [supplierPurchases, setSupplierPurchases] = useState([]);
   const [loadingPurchases, setLoadingPurchases] = useState(false);
+  const [modalSearch, setModalSearch] = useState('');
 
   const fetchSuppliers = async () => {
     setLoading(true);
@@ -36,11 +38,12 @@ export default function SuppliersPage({ readOnly }) {
 
   const handleOpenTracking = async (supplier) => {
     setSelectedSupplier(supplier);
+    setModalSearch('');
     setTrackingModalOpen(true);
     setLoadingPurchases(true);
     setSupplierPurchases([]);
     try {
-      const { data } = await api.get('/purchases', { params: { supplier: supplier._id, limit: 30 } });
+      const { data } = await api.get('/purchases', { params: { supplier: supplier._id, limit: 100 } }); // Fetch up to 100 purchases
       setSupplierPurchases(data.data || []);
     } catch (err) {
       toast.error('Failed to load purchase history.');
@@ -66,6 +69,17 @@ export default function SuppliersPage({ readOnly }) {
     try { await api.delete(`/suppliers/${id}`); toast.success('Deleted.'); fetchSuppliers(); }
     catch { toast.error('Delete failed.'); }
   };
+
+  // Filter purchases locally inside modal
+  const filteredModalPurchases = supplierPurchases.filter(p => {
+    if (!modalSearch.trim()) return true;
+    const term = modalSearch.toLowerCase().trim();
+    const matchPO = p.purchaseId?.toLowerCase().includes(term);
+    const matchInv = p.invoiceNumber?.toLowerCase().includes(term);
+    const formattedDate = new Date(p.createdAt).toLocaleDateString('en-IN');
+    const matchDate = formattedDate.includes(term);
+    return matchPO || matchInv || matchDate;
+  });
 
   return (
     <div className="space-y-6">
@@ -137,26 +151,36 @@ export default function SuppliersPage({ readOnly }) {
         footer={<button onClick={() => setTrackingModalOpen(false)} className="btn-primary">Close</button>}
       >
         <div className="space-y-4">
-          <div className="bg-gray-50 p-3 rounded-xl text-xs space-y-1 text-gray-500 border border-gray-100">
-            {selectedSupplier?.contactPerson && <p><strong>Contact Person:</strong> {selectedSupplier.contactPerson}</p>}
-            {selectedSupplier?.phone && <p><strong>Phone:</strong> {selectedSupplier.phone}</p>}
-            {selectedSupplier?.email && <p><strong>Email:</strong> {selectedSupplier.email}</p>}
-            {selectedSupplier?.gstin && <p><strong>GSTIN:</strong> <span className="font-mono">{selectedSupplier.gstin}</span></p>}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="bg-gray-50 p-3 rounded-xl text-xs space-y-1 text-gray-500 border border-gray-100 flex-1">
+              {selectedSupplier?.contactPerson && <p><strong>Contact Person:</strong> {selectedSupplier.contactPerson}</p>}
+              {selectedSupplier?.phone && <p><strong>Phone:</strong> {selectedSupplier.phone}</p>}
+              {selectedSupplier?.email && <p><strong>Email:</strong> {selectedSupplier.email}</p>}
+              {selectedSupplier?.gstin && <p><strong>GSTIN:</strong> <span className="font-mono">{selectedSupplier.gstin}</span></p>}
+            </div>
+            <div className="flex items-center flex-1">
+              <SearchInput
+                placeholder="Search PO ID, Invoice #, or Date (DD/MM/YYYY)..."
+                value={modalSearch}
+                onChange={setModalSearch}
+                className="w-full text-xs shadow-none border-gray-200"
+              />
+            </div>
           </div>
 
-          <div className="overflow-y-auto max-h-[60vh] pr-1 space-y-3">
+          <div className="overflow-y-auto max-h-[55vh] pr-1 space-y-3">
             {loadingPurchases ? (
               <div className="space-y-2 py-4">
                 <div className="h-16 bg-gray-50 rounded-xl animate-pulse" />
                 <div className="h-16 bg-gray-50 rounded-xl animate-pulse" />
                 <div className="h-16 bg-gray-50 rounded-xl animate-pulse" />
               </div>
-            ) : supplierPurchases.length === 0 ? (
+            ) : filteredModalPurchases.length === 0 ? (
               <div className="text-center py-8 text-gray-400 italic text-sm">
-                No purchase orders recorded for this purchaser.
+                No matching purchase orders found.
               </div>
             ) : (
-              supplierPurchases.map(p => (
+              filteredModalPurchases.map(p => (
                 <div key={p._id} className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm space-y-3">
                   <div className="flex justify-between items-center flex-wrap gap-2">
                     <div>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Edit } from 'lucide-react';
 import api from '../../api/axios';
 import StatusBadge from '../../components/ui/StatusBadge';
 import SearchInput from '../../components/ui/SearchInput';
+import Modal from '../../components/ui/Modal';
 import toast from 'react-hot-toast';
 
 export default function PurchaseHistoryPage() {
@@ -11,21 +12,55 @@ export default function PurchaseHistoryPage() {
   const [search, setSearch] = useState('');
   const [pagination, setPagination] = useState({ page: 1, pages: 1 });
 
+  // Status update states
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [selectedPurchase, setSelectedPurchase] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [updating, setUpdating] = useState(false);
+
   const fetchPurchases = async (page = 1) => {
     setLoading(true);
     try {
       const { data } = await api.get('/purchases', { params: { page, limit: 15, search } });
-      setPurchases(data.data); setPagination(data.pagination);
+      setPurchases(data.data);
+      setPagination(data.pagination);
     } catch {}
     setLoading(false);
   };
 
-  useEffect(() => { fetchPurchases(1); }, [search]);
+  useEffect(() => {
+    fetchPurchases(1);
+  }, [search]);
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this purchase? Inventory will be adjusted.')) return;
-    try { await api.delete(`/purchases/${id}`); toast.success('Purchase deleted. Inventory adjusted.'); fetchPurchases(); }
-    catch (err) { toast.error(err.response?.data?.message || 'Delete failed.'); }
+    try {
+      await api.delete(`/purchases/${id}`);
+      toast.success('Purchase deleted. Inventory adjusted.');
+      fetchPurchases();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Delete failed.');
+    }
+  };
+
+  const openStatusUpdate = (p) => {
+    setSelectedPurchase(p);
+    setNewStatus(p.status === 'ordered' ? 'received' : p.status);
+    setStatusModalOpen(true);
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!newStatus) return;
+    setUpdating(true);
+    try {
+      await api.put(`/purchases/${selectedPurchase._id}`, { status: newStatus });
+      toast.success(`Purchase order status updated to ${newStatus}`);
+      setStatusModalOpen(false);
+      fetchPurchases();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Update failed.');
+    }
+    setUpdating(false);
   };
 
   return (
@@ -60,7 +95,18 @@ export default function PurchaseHistoryPage() {
                     <td className="table-td"><StatusBadge status={p.status} /></td>
                     <td className="table-td text-xs text-gray-400">{new Date(p.createdAt).toLocaleDateString('en-IN')}</td>
                     <td className="table-td">
-                      <button onClick={() => handleDelete(p._id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /></button>
+                      <div className="flex items-center gap-1.5">
+                        {p.status === 'ordered' && (
+                          <button
+                            onClick={() => openStatusUpdate(p)}
+                            title="Update Status"
+                            className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                          >
+                            <Edit size={14} />
+                          </button>
+                        )}
+                        <button onClick={() => handleDelete(p._id)} className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"><Trash2 size={14} /></button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -84,6 +130,39 @@ export default function PurchaseHistoryPage() {
           </div>
         )}
       </div>
+
+      {/* Small Status Update Modal */}
+      <Modal
+        isOpen={statusModalOpen}
+        onClose={() => setStatusModalOpen(false)}
+        title="Update Purchase Order Status"
+        size="sm"
+        footer={<><button onClick={() => setStatusModalOpen(false)} className="btn-secondary">Cancel</button>
+          <button onClick={handleStatusUpdate} disabled={updating} className="btn-primary">{updating ? 'Updating...' : 'Update Status'}</button></>}
+      >
+        {selectedPurchase && (
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              PO ID: <span className="font-mono font-semibold text-primary-700">{selectedPurchase.purchaseId}</span>
+            </p>
+            <div className="form-group">
+              <label className="label">New Status</label>
+              <select
+                className="select-field"
+                value={newStatus}
+                onChange={e => setNewStatus(e.target.value)}
+              >
+                <option value="ordered">Ordered</option>
+                <option value="received">Received (Adds items to inventory)</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <p className="text-[11px] text-gray-400 bg-gray-50 p-2 rounded-lg leading-relaxed">
+              ⚠️ Changing status to <strong>Received</strong> will automatically increment the stock levels for all products in this purchase.
+            </p>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

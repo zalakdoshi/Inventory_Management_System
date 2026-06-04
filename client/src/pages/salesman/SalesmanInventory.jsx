@@ -698,7 +698,7 @@ function buildGroupedProducts(list) {
 }
 
 export default function SalesmanInventory() {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -708,18 +708,26 @@ export default function SalesmanInventory() {
     api
       .get('/products', {
         params: {
-          limit: 1000,
-          search,
-          category: categoryFilter,
+          limit: 2000,
           status: 'active',
         },
       })
-      .then((r) => setProducts(r.data?.data || []))
-      .catch(() => setProducts([]))
+      .then((r) => setAllProducts(r.data?.data || []))
+      .catch(() => setAllProducts([]))
       .finally(() => setLoading(false));
-  }, [search, categoryFilter]);
+  }, []);
 
-  const groupedProducts = buildGroupedProducts(products);
+  const filteredProducts = allProducts.filter(p => {
+    const matchesCategory = !categoryFilter || p.category === categoryFilter;
+    const matchesSearch = !search || 
+      p.name.toLowerCase().includes(search.toLowerCase().trim()) ||
+      p.productId?.toLowerCase().includes(search.toLowerCase().trim()) ||
+      p.hsnCode?.toLowerCase().includes(search.toLowerCase().trim()) ||
+      p.barcode?.toLowerCase().includes(search.toLowerCase().trim());
+    return matchesCategory && matchesSearch;
+  });
+
+  const groupedProducts = buildGroupedProducts(filteredProducts);
 
   return (
     <div className="space-y-6">

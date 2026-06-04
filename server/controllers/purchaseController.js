@@ -97,15 +97,8 @@ const createPurchase = async (req, res) => {
       notes,
       invoiceNumber,
       purchaseDate: purchaseDate || new Date(),
-      status: 'received',
+      status: 'ordered',
     });
-
-    // Auto-update inventory
-    for (const item of processedItems) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { quantity: item.quantity },
-      });
-    }
 
     await createActivityLog({
       user: req.user,
@@ -117,7 +110,7 @@ const createPurchase = async (req, res) => {
       severity: 'medium',
     });
 
-    res.status(201).json({ success: true, message: 'Purchase created and inventory updated.', data: purchase });
+    res.status(201).json({ success: true, message: 'Purchase order created.', data: purchase });
   } catch (error) {
     logger.error('Create purchase error:', error);
     res.status(500).json({ success: false, message: error.message || 'Server error.' });
@@ -139,13 +132,30 @@ const updatePurchase = async (req, res) => {
     }
 
     const before = { status: purchase.status, totalAmount: purchase.totalAmount };
+    const { status } = req.body;
+
+    if (status && status !== purchase.status) {
+      // From non-received to received -> Increment inventory
+      if (status === 'received' && purchase.status !== 'received') {
+        for (const item of purchase.items) {
+          await Product.findByIdAndUpdate(item.product, { $inc: { quantity: item.quantity } });
+        }
+      }
+      // From received to non-received -> Decrement inventory
+      if (purchase.status === 'received' && status !== 'received') {
+        for (const item of purchase.items) {
+          await Product.findByIdAndUpdate(item.product, { $inc: { quantity: -item.quantity } });
+        }
+      }
+    }
+
     const updated = await Purchase.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
     await createActivityLog({
       user: req.user,
       action: 'UPDATE',
       module: 'Purchases',
-      description: `Updated purchase ${purchase.purchaseId}`,
+      description: `Updated purchase ${purchase.purchaseId} — status changed to ${status || purchase.status}`,
       details: { before, after: req.body },
       req,
       severity: 'medium',
