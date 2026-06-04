@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle, Clock, Package, Truck, MapPin, Plus } from 'lucide-react';
+import { CheckCircle, Clock, Package, Truck, MapPin, Plus, Download } from 'lucide-react';
 import api from '../../api/axios';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Modal from '../../components/ui/Modal';
@@ -56,6 +56,14 @@ export default function OrderTrackingPage() {
 
   useEffect(() => { fetchOrders(); }, []);
 
+  const downloadPDF = async (id) => {
+    try {
+      const res = await api.get(`/bills/${id}/pdf`, { responseType: 'blob' });
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      window.open(url, '_blank');
+    } catch { toast.error('Failed to generate PDF.'); }
+  };
+
   const handleStatusUpdate = async () => {
     if (!newStatus) return;
     setUpdating(true);
@@ -97,10 +105,20 @@ export default function OrderTrackingPage() {
                     <p className="font-semibold text-gray-900">{order.customer?.name}</p>
                     <p className="text-sm text-gray-500">{order.customer?.phone} · {order.items?.length} items · ₹{order.totalAmount?.toLocaleString('en-IN')}</p>
                   </div>
-                  {nextOptions.length > 0 && (
-                    <button onClick={() => { setSelectedOrder(order); setStatusModal(true); setNewStatus(nextOptions[0]); }}
-                      className="btn-primary text-sm py-1.5 px-4">Update Status</button>
-                  )}
+                  <div className="flex gap-2 items-center">
+                    {order.bill && ['approved', 'packed', 'dispatched', 'delivered'].includes(order.status) && (
+                      <button
+                        onClick={() => downloadPDF(order.bill._id || order.bill)}
+                        className="flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-2 rounded-xl font-semibold transition-colors"
+                      >
+                        <Download size={13} /> Download Invoice
+                      </button>
+                    )}
+                    {nextOptions.length > 0 && (
+                      <button onClick={() => { setSelectedOrder(order); setStatusModal(true); setNewStatus(nextOptions[0]); }}
+                        className="btn-primary text-sm py-1.5 px-4">Update Status</button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Timeline */}

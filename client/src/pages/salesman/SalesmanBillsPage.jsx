@@ -51,9 +51,15 @@ export default function SalesmanBillsPage() {
                     <td className="table-td text-base font-bold text-primary-700">₹{b.grandTotal?.toLocaleString('en-IN')}</td>
                     <td className="table-td text-sm text-gray-600 capitalize">{b.paymentMode?.replace('_', ' ')}</td>
                     <td className="table-td">
-                      <button onClick={() => downloadPDF(b._id)} className="flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium hover:bg-primary-50 px-2 py-1.5 rounded-lg transition-colors">
-                        <Download size={15} /> PDF
-                      </button>
+                      {b.order && !['approved', 'packed', 'dispatched', 'delivered'].includes(b.order.status) ? (
+                        <span className="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-50 border border-gray-200 px-2 py-1.5 rounded-lg select-none cursor-not-allowed" title="Invoice is locked until order is approved.">
+                          Awaiting Approval
+                        </span>
+                      ) : (
+                        <button onClick={() => downloadPDF(b._id)} className="flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium hover:bg-primary-50 px-2 py-1.5 rounded-lg transition-colors">
+                          <Download size={15} /> PDF
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

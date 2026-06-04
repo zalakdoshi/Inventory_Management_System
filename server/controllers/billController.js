@@ -29,7 +29,12 @@ const getBills = async (req, res) => {
     if (search) query.$or = [{ billId: { $regex: search, $options: 'i' } }, { 'customer.name': { $regex: search, $options: 'i' } }];
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [bills, total] = await Promise.all([
-      Bill.find(query).populate('createdBy', 'name role').sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)),
+      Bill.find(query)
+        .populate('createdBy', 'name role')
+        .populate('order', 'status orderId')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
       Bill.countDocuments(query),
     ]);
     res.status(200).json({ success: true, data: bills, pagination: { total, page: parseInt(page), limit: parseInt(limit), pages: Math.ceil(total / parseInt(limit)) } });
