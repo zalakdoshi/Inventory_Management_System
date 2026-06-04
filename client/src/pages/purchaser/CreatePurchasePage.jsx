@@ -13,6 +13,9 @@ export default function CreatePurchasePage() {
   const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedSupplierId, setSelectedSupplierId] = useState('');
+  const [newSupplierDetails, setNewSupplierDetails] = useState({ phone: '', email: '', gstin: '' });
+
+  const isNewSupplier = supplierInput.trim() && !selectedSupplierId && !suppliers.some(s => s.name.toLowerCase() === supplierInput.trim().toLowerCase());
   const [form, setForm] = useState({
     invoiceNumber: '',
     purchaseDate: new Date().toISOString().split('T')[0],
@@ -76,7 +79,12 @@ export default function CreatePurchasePage() {
 
     // Auto-create new supplier
     try {
-      const { data } = await api.post('/suppliers', { name });
+      const { data } = await api.post('/suppliers', {
+        name,
+        phone: newSupplierDetails.phone,
+        email: newSupplierDetails.email,
+        gstin: newSupplierDetails.gstin,
+      });
       toast.success(`New purchaser "${name}" added automatically!`);
       return { supplierId: data.data._id, supplierName: data.data.name };
     } catch {
@@ -203,6 +211,42 @@ export default function CreatePurchasePage() {
                 )}
               </div>
             </div>
+
+            {isNewSupplier && (
+              <div className="col-span-full bg-primary-50/30 border border-primary-100/50 rounded-2xl p-4 mt-2 space-y-3">
+                <h4 className="text-xs font-bold text-primary-800 uppercase tracking-wider">New Purchaser Details</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="form-group">
+                    <label className="label text-xs">Phone Number</label>
+                    <input
+                      className="input-field text-xs bg-white"
+                      placeholder="e.g. +91 9998160084"
+                      value={newSupplierDetails.phone}
+                      onChange={e => setNewSupplierDetails({ ...newSupplierDetails, phone: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="label text-xs">Email Address</label>
+                    <input
+                      type="email"
+                      className="input-field text-xs bg-white"
+                      placeholder="e.g. contact@company.com"
+                      value={newSupplierDetails.email}
+                      onChange={e => setNewSupplierDetails({ ...newSupplierDetails, email: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="label text-xs">GSTIN</label>
+                    <input
+                      className="input-field text-xs font-mono bg-white uppercase"
+                      placeholder="e.g. 24AABCV1234A1Z5"
+                      value={newSupplierDetails.gstin}
+                      onChange={e => setNewSupplierDetails({ ...newSupplierDetails, gstin: e.target.value.toUpperCase() })}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="form-group">
               <label className="label">Invoice Number</label>
