@@ -45,6 +45,25 @@ const customFormat = printf((info) => {
   return out;
 });
 
+const transports = [
+  new winston.transports.Console({
+    format: combine(colorize(), timestamp({ format: 'HH:mm:ss' }), customFormat),
+  }),
+];
+
+// File transports only work on non-serverless environments (Vercel has a read-only filesystem)
+if (!process.env.VERCEL) {
+  transports.push(
+    new winston.transports.File({
+      filename: path.join(__dirname, '../logs/error.log'),
+      level: 'error',
+    }),
+    new winston.transports.File({
+      filename: path.join(__dirname, '../logs/combined.log'),
+    })
+  );
+}
+
 const logger = winston.createLogger({
   level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
   format: combine(
@@ -52,18 +71,7 @@ const logger = winston.createLogger({
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     customFormat
   ),
-  transports: [
-    new winston.transports.Console({
-      format: combine(colorize(), timestamp({ format: 'HH:mm:ss' }), customFormat),
-    }),
-    new winston.transports.File({
-      filename: path.join(__dirname, '../logs/error.log'),
-      level: 'error',
-    }),
-    new winston.transports.File({
-      filename: path.join(__dirname, '../logs/combined.log'),
-    }),
-  ],
+  transports,
 });
 
 module.exports = logger;
