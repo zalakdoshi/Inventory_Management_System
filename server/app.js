@@ -65,7 +65,7 @@ function isOriginAllowed(origin) {
 
 // Explicit preflight handler — ensures OPTIONS requests always get CORS headers
 // (Vercel serverless can sometimes skip Express middleware for preflight)
-app.options('*', (req, res) => {
+app.options('/{*path}', (req, res) => {
   const origin = req.headers.origin;
   if (isOriginAllowed(origin)) {
     res.set('Access-Control-Allow-Origin', origin || '*');
