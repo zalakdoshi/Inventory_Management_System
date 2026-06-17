@@ -19,24 +19,7 @@ const passwordResetRoutes = require('./routes/passwordReset');
 
 const app = express();
 
-// ── Compression Middleware (Reduce response size) ────────────────
-app.use(compression());
-
-// ── Cache Headers Middleware ────────────────────────────────────
-app.use((req, res, next) => {
-  // Exclude API routes from GET caching to ensure fresh inventory and product data
-  if (req.method === 'GET' && !req.path.startsWith('/api/')) {
-    res.set('Cache-Control', 'public, max-age=300');
-  } else {
-    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-  }
-  next();
-});
-
-// ── Security Middleware ────────────────────────────────────────
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-
-// ── CORS ────────────────────────────────────────────────────────
+// ── CORS (must be FIRST, before all other middleware) ────────────
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
@@ -63,9 +46,8 @@ function isOriginAllowed(origin) {
   return false;
 }
 
-// Explicit preflight handler — ensures OPTIONS requests always get CORS headers
-// (Vercel serverless can sometimes skip Express middleware for preflight)
-app.options('/{*path}', (req, res) => {
+// Universal CORS middleware — handles preflight AND sets headers on all responses
+app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (isOriginAllowed(origin)) {
     res.set('Access-Control-Allow-Origin', origin || '*');
@@ -73,21 +55,29 @@ app.options('/{*path}', (req, res) => {
     res.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
     res.set('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   }
-  res.status(204).end();
+  // Handle preflight immediately — don't let any other middleware touch it
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
 });
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (isOriginAllowed(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// ── Compression Middleware (Reduce response size) ────────────────
+app.use(compression());
+
+// ── Cache Headers Middleware ────────────────────────────────────
+app.use((req, res, next) => {
+  // Exclude API routes from GET caching to ensure fresh inventory and product data
+  if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+    res.set('Cache-Control', 'public, max-age=300');
+  } else {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  next();
+});
+
+// ── Security Middleware ────────────────────────────────────────
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
 // ── Rate Limiting ───────────────────────────────────────────────
 const limiter = rateLimit({
