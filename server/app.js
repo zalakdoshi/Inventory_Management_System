@@ -54,16 +54,38 @@ if (process.env.VERCEL_URL) {
 // Filter out undefined values
 const validOrigins = allowedOrigins.filter(origin => origin && origin !== 'undefined');
 
+// Helper to check if origin is allowed (includes *.vercel.app preview deploys)
+function isOriginAllowed(origin) {
+  if (!origin) return true;
+  if (validOrigins.includes(origin)) return true;
+  if (/^https:\/\/.*\.vercel\.app$/.test(origin)) return true;
+  if (process.env.NODE_ENV === 'development') return true;
+  return false;
+}
+
+// Explicit preflight handler — ensures OPTIONS requests always get CORS headers
+// (Vercel serverless can sometimes skip Express middleware for preflight)
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  if (isOriginAllowed(origin)) {
+    res.set('Access-Control-Allow-Origin', origin || '*');
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  }
+  res.status(204).end();
+});
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || validOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
