@@ -5,22 +5,24 @@ const nodemailer = require('nodemailer');
 const { createActivityLog } = require('../middleware/activityLog');
 const logger = require('../utils/logger');
 
+/** Helper: create a nodemailer transporter */
+const createTransporter = () => nodemailer.createTransport({
+  service: 'gmail',
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+});
+
 const sendResetEmail = async (email, token, userName) => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
-    });
-
+    const transporter = createTransporter();
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
     await transporter.sendMail({
-      from: `"Vardhman Family ERP" <${process.env.EMAIL_USER}>`,
+      from: `"Inventory Management System" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: 'Password Reset Approved — Vardhman Family ERP',
+      subject: 'Password Reset Approved — Inventory Management System',
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f0fdf4;padding:30px;border-radius:10px;">
           <div style="background:#166534;padding:20px;border-radius:8px;text-align:center;">
-            <h1 style="color:white;margin:0;">Vardhman Family ERP</h1>
+            <h1 style="color:white;margin:0;">Inventory Management System</h1>
           </div>
           <div style="padding:20px;">
             <h2>Hello ${userName},</h2>
@@ -34,8 +36,63 @@ const sendResetEmail = async (email, token, userName) => {
         </div>
       `,
     });
+    logger.info(`Reset email sent successfully to ${email}`);
   } catch (error) {
-    logger.error('Email send error:', error.message);
+    // Log full error so it's visible in server logs
+    logger.error('sendResetEmail FAILED — check EMAIL_PASSWORD in .env:', error.message);
+    throw error; // Re-throw so caller knows email failed
+  }
+};
+
+/**
+ * Notify ALL admin users by email about a new password reset request.
+ * If there are multiple admins, all of them receive the notification.
+ */
+const notifyAdminsOfRequest = async (requesterName, requesterEmail, requesterRole) => {
+  try {
+    // Find all active admin users
+    const admins = await User.find({ role: 'admin', isActive: true }).select('email name');
+    if (!admins.length) {
+      logger.warn('notifyAdminsOfRequest: No active admin users found to notify.');
+      return;
+    }
+
+    const transporter = createTransporter();
+    const adminPanelUrl = `${process.env.FRONTEND_URL}/admin/password-reset`;
+
+    const adminEmails = admins.map(a => a.email);
+    logger.info(`Notifying ${admins.length} admin(s) of password reset request: ${adminEmails.join(', ')}`);
+
+    await transporter.sendMail({
+      from: `"Inventory Management System" <${process.env.EMAIL_USER}>`,
+      to: adminEmails, // Sends to ALL admins at once
+      subject: `⚠️ Password Reset Request — ${requesterName} (${requesterRole})`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:30px;border-radius:10px;">
+          <div style="background:#166534;padding:20px;border-radius:8px;text-align:center;">
+            <h1 style="color:white;margin:0;font-size:20px;">Inventory Management System</h1>
+            <p style="color:#bbf7d0;margin:6px 0 0 0;font-size:13px;">Admin Action Required</p>
+          </div>
+          <div style="padding:24px;background:white;margin-top:16px;border-radius:8px;border:1px solid #e5e7eb;">
+            <h2 style="color:#111827;margin:0 0 12px;">New Password Reset Request</h2>
+            <p style="color:#374151;">A user has requested a password reset and is waiting for your approval.</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+              <tr><td style="padding:8px;color:#6b7280;font-size:13px;">Name</td><td style="padding:8px;font-weight:600;color:#111827;">${requesterName}</td></tr>
+              <tr style="background:#f9fafb;"><td style="padding:8px;color:#6b7280;font-size:13px;">Email</td><td style="padding:8px;font-weight:600;color:#111827;">${requesterEmail}</td></tr>
+              <tr><td style="padding:8px;color:#6b7280;font-size:13px;">Role</td><td style="padding:8px;font-weight:600;color:#111827;text-transform:capitalize;">${requesterRole}</td></tr>
+              <tr style="background:#f9fafb;"><td style="padding:8px;color:#6b7280;font-size:13px;">Requested At</td><td style="padding:8px;font-weight:600;color:#111827;">${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</td></tr>
+            </table>
+            <div style="text-align:center;margin:24px 0 8px;">
+              <a href="${adminPanelUrl}" style="background:#16a34a;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-size:15px;font-weight:600;">Review Request →</a>
+            </div>
+            <p style="color:#9ca3af;font-size:12px;text-align:center;margin-top:16px;">All active admins have received this notification. Only the first admin to review it needs to act.</p>
+          </div>
+        </div>
+      `,
+    });
+  } catch (error) {
+    // Non-fatal — log but don't block the request creation
+    logger.error('notifyAdminsOfRequest FAILED — check EMAIL_PASSWORD in .env:', error.message);
   }
 };
 
@@ -78,6 +135,9 @@ const requestPasswordReset = async (req, res) => {
       req,
       severity: 'medium',
     });
+
+    // Notify ALL active admins by email (non-blocking)
+    notifyAdminsOfRequest(user.name, user.email, user.role);
 
     res.status(201).json({ success: true, message: 'Password reset request submitted. Admin will review and approve.' });
   } catch (error) {
@@ -125,7 +185,20 @@ const handleResetRequest = async (req, res) => {
       request.resetToken = token;
       request.resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
       await request.save();
-      await sendResetEmail(request.userEmail, token, request.userName);
+
+      try {
+        await sendResetEmail(request.userEmail, token, request.userName);
+      } catch (emailErr) {
+        // Email failed — revert status so admin can try again
+        request.status = 'pending';
+        request.resetToken = null;
+        request.resetTokenExpiry = null;
+        await request.save();
+        return res.status(500).json({
+          success: false,
+          message: 'Approval saved but email failed to send. Check EMAIL_PASSWORD in server .env and try again.',
+        });
+      }
 
       await createActivityLog({
         user: req.user,

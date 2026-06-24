@@ -40,7 +40,10 @@ export default function ProductsPage() {
       });
       setProducts(data.data);
       setPagination(data.pagination);
-    } catch { toast.error('Failed to fetch products.'); }
+    } catch (err) {
+      console.error('fetchProducts error:', err?.response?.status, err?.response?.data, err?.message);
+      toast.error(err?.response?.data?.message || 'Failed to fetch products.');
+    }
     setLoading(false);
   };
 

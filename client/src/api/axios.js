@@ -25,9 +25,16 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('vardhman_token');
-      localStorage.removeItem('vardhman_user');
-      window.location.href = '/login';
+      const onAuthPage = ['/login', '/register', '/reset-password'].some(p =>
+        window.location.pathname.startsWith(p)
+      );
+      // Only redirect if NOT already on a public auth page
+      // (otherwise the page reload kills the error toast on login failures)
+      if (!onAuthPage) {
+        localStorage.removeItem('vardhman_token');
+        localStorage.removeItem('vardhman_user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
